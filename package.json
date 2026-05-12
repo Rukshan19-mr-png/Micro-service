@@ -1,0 +1,17 @@
+{
+  "name": "nexusevent-monorepo",
+  "version": "1.0.0",
+  "description": "Microservices Ticketing Platform",
+  "scripts": {
+    "install:all": "npm install --prefix api-gateway && npm install --prefix services/auth-service && npm install --prefix services/event-service && npm install --prefix services/booking-service && npm install --prefix services/payment-service && npm install --prefix services/notification-service",
+    "start:auth": "node services/auth-service/index.js",
+    "start:events": "node services/event-service/index.js",
+    "start:bookings": "node services/booking-service/index.js",
+    "start:payments": "node services/payment-service/index.js",
+    "start:notifications": "node services/notification-service/index.js",
+    "start:gateway": "node api-gateway/index.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
