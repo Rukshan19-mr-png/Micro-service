@@ -31,8 +31,8 @@ const authenticate = async (req, res, next) => {
 };
 
 // Route: Auth
-app.post('/api/auth/*', async (req, res) => {
-    const path = req.params[0];
+app.post('/api/auth/:path(.*)', async (req, res) => {
+    const path = req.params.path;
     try {
         const response = await axios.post(`${SERVICES.auth}/auth/${path}`, req.body);
         res.status(response.status).json(response.data);
