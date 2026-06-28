@@ -5,6 +5,10 @@ app.use(express.json());
 app.post('/payments/process', (req, res) => {
     const { amount, paymentDetails } = req.body;
     
+    if (!paymentDetails || !paymentDetails.cardNumber) {
+        return res.status(400).json({ status: 'FAILED', error: 'Missing payment details' });
+    }
+    
     console.log(`Processing payment of $${amount} for ${paymentDetails.cardNumber}`);
     
     // Simulate payment logic

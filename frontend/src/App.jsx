@@ -1,26 +1,68 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Calendar, MapPin, Ticket, Search, User, LogIn, Bell } from 'lucide-react';
+import { Calendar, MapPin, Ticket, Search, User, LogIn, Bell, X, LogOut } from 'lucide-react';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = '/api';
 
 const App = () => {
-  const [events, setEvents] = useState([
-    { id: 1, title: 'Tech Conference 2026', price: 150, location: 'San Francisco', available: 100, category: 'Tech' },
-    { id: 2, title: 'Neon Music Festival', price: 75, location: 'Austin', available: 500, category: 'Music' },
-    { id: 3, title: 'AI & Robotics Workshop', price: 0, location: 'London', available: 1000, category: 'Tech' },
-    { id: 4, title: 'Gourmet Food Expo', price: 45, location: 'Paris', available: 250, category: 'Food' }
-  ]);
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(localStorage.getItem('token') || null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  // In a real app, you would fetch from the API Gateway
-  // useEffect(() => {
-  //   axios.get(`${API_BASE}/events`).then(res => setEvents(res.data));
-  // }, []);
+  const handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isRegisterMode) {
+        await axios.post(`${API_BASE}/auth/register`, { email, password });
+        alert('Registration successful! Please log in.');
+        setIsRegisterMode(false);
+      } else {
+        const res = await axios.post(`${API_BASE}/auth/login`, { email, password });
+        const token = res.data.token;
+        setUser(token);
+        localStorage.setItem('token', token);
+        setShowAuthModal(false);
+      }
+    } catch (err) {
+      alert('Authentication failed: ' + (err.response?.data?.error || err.message));
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+  };
+
+  useEffect(() => {
+    axios.get(`${API_BASE}/events`)
+      .then(res => {
+        setEvents(res.data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching events:', err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleBook = async (eventId) => {
-    alert('Requesting booking for event ID: ' + eventId + '\n(Make sure your microservices are running!)');
+    if (!user) {
+      alert('You need to be logged in to book an event!');
+      return;
+    }
+    try {
+      await axios.post(`${API_BASE}/bookings`, { 
+        eventId, 
+        paymentDetails: { cardNumber: '4111-1111-1111-1111', expiry: '12/28', cvv: '123' } 
+      }, { headers: { authorization: `Bearer ${user}` } });
+      alert('Booking successful!');
+    } catch (err) {
+      alert('Booking failed. Please try again.');
+    }
   };
 
   return (
@@ -44,10 +86,17 @@ const App = () => {
           <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-all">
             <Search size={20} />
           </button>
-          <button className="flex items-center gap-2 bg-brand-500 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-brand-600 shadow-lg shadow-brand-200 transition-all active:scale-95">
-            <LogIn size={18} />
-            Login
-          </button>
+          {user ? (
+            <button onClick={handleLogout} className="flex items-center gap-2 bg-slate-200 text-slate-700 px-5 py-2.5 rounded-full font-semibold hover:bg-slate-300 transition-all active:scale-95">
+              <LogOut size={18} />
+              Logout
+            </button>
+          ) : (
+            <button onClick={() => setShowAuthModal(true)} className="flex items-center gap-2 bg-brand-500 text-white px-5 py-2.5 rounded-full font-semibold hover:bg-brand-600 shadow-lg shadow-brand-200 transition-all active:scale-95">
+              <LogIn size={18} />
+              Login
+            </button>
+          )}
         </div>
       </nav>
 
@@ -123,6 +172,74 @@ const App = () => {
       <footer className="border-t border-slate-200 py-12 text-center text-slate-400 text-sm">
         <p>&copy; 2026 NexusEvent. Built for Software Engineering Internship Portfolio.</p>
       </footer>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-md relative animate-in fade-in zoom-in duration-200">
+            <button 
+              onClick={() => setShowAuthModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition-all"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="text-center mb-8">
+              <div className="bg-brand-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="text-brand-600" size={32} />
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900">
+                {isRegisterMode ? 'Create Account' : 'Welcome Back'}
+              </h2>
+              <p className="text-slate-500 mt-2">
+                {isRegisterMode ? 'Sign up to book exclusive events' : 'Log in to manage your bookings'}
+              </p>
+            </div>
+
+            <form onSubmit={handleAuthSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
+                <input 
+                  type="email" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition-all"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+                <input 
+                  type="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 outline-none transition-all"
+                  placeholder="••••••••"
+                  required
+                />
+              </div>
+              
+              <button 
+                type="submit" 
+                className="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-brand-500/30 hover:shadow-brand-500/40 active:scale-[0.98] transition-all mt-4"
+              >
+                {isRegisterMode ? 'Sign Up' : 'Log In'}
+              </button>
+            </form>
+
+            <div className="mt-8 text-center text-sm text-slate-500">
+              {isRegisterMode ? 'Already have an account?' : "Don't have an account?"}
+              <button 
+                onClick={() => setIsRegisterMode(!isRegisterMode)}
+                className="ml-2 font-bold text-brand-600 hover:text-brand-700 hover:underline"
+              >
+                {isRegisterMode ? 'Log in here' : 'Sign up now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
