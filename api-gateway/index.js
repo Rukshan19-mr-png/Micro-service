@@ -31,10 +31,10 @@ const authenticate = async (req, res, next) => {
 };
 
 // Route: Auth
-app.post('/api/auth/:path(.*)', async (req, res) => {
-    const path = req.params.path;
+app.post('/api/auth/:action', async (req, res) => {
+    const action = req.params.action;
     try {
-        const response = await axios.post(`${SERVICES.auth}/auth/${path}`, req.body);
+        const response = await axios.post(`${SERVICES.auth}/auth/${action}`, req.body);
         res.status(response.status).json(response.data);
     } catch (err) {
         res.status(err.response?.status || 500).json(err.response?.data || { error: 'Auth Error' });

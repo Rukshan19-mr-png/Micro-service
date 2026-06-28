@@ -1,1 +1,1 @@
-{"name":"auth-service","version":"1.0.0","main":"index.js","dependencies":{"nexusevent-monorepo":"file:../.."}}
+{"name":"auth-service","version":"1.0.0","main":"index.js","scripts":{"start":"node index.js"},"dependencies":{"nexusevent-monorepo":"file:../..","pg":"^8.22.0"}}

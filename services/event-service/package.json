@@ -1,1 +1,1 @@
-{"name":"event-service","version":"1.0.0","main":"index.js","dependencies":{"nexusevent-monorepo":"file:../.."}}
+{"name":"event-service","version":"1.0.0","main":"index.js","scripts":{"start":"node index.js"},"dependencies":{"mongoose":"^9.7.3","nexusevent-monorepo":"file:../.."}}
