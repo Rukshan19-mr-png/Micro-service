@@ -8,6 +8,8 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+let ready = false;
+
 // Initialize database (create table if it doesn't exist)
 const initDb = async () => {
   try {
@@ -19,13 +21,18 @@ const initDb = async () => {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    ready = true;
     console.log('Database initialized successfully.');
+    return true;
   } catch (error) {
-    console.error('Error initializing database:', error);
+    ready = false;
+    console.warn('PostgreSQL unavailable. Auth service will use in-memory users for this run.');
+    return false;
   }
 };
 
 module.exports = {
   query: (text, params) => pool.query(text, params),
   initDb,
+  isReady: () => ready,
 };
