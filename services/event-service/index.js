@@ -2,30 +2,79 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-const EVENTS = [
-    { id: 1, title: 'Tech Conference 2026', category: 'Tech', price: 150, location: 'San Francisco', available: 100, capacity: 100, date: '2026-09-18' },
-    { id: 2, title: 'Music Festival', category: 'Music', price: 75, location: 'Austin', available: 500, capacity: 500, date: '2026-10-04' },
-    { id: 3, title: 'AI Workshop', category: 'Tech', price: 0, location: 'Online', available: 1000, capacity: 1000, date: '2026-08-12' }
+const INTERNSHIPS = [
+    { 
+        id: 1, 
+        title: 'Frontend Software Engineer Intern', 
+        company: 'Google', 
+        category: 'Frontend', 
+        price: 15, 
+        location: 'San Francisco, CA (Hybrid)', 
+        available: 5, 
+        capacity: 5, 
+        date: '2026-09-18', 
+        skills: ['React', 'JavaScript', 'CSS'], 
+        description: 'Collaborate with UI designers and senior engineers to build accessible, high-performance features using React.' 
+    },
+    { 
+        id: 2, 
+        title: 'Backend Systems Intern', 
+        company: 'Stripe', 
+        category: 'Backend', 
+        price: 15, 
+        location: 'Austin, TX (On-site)', 
+        available: 3, 
+        capacity: 3, 
+        date: '2026-10-04', 
+        skills: ['Node.js', 'Express', 'PostgreSQL'], 
+        description: 'Work on foundational payment systems, APIs, and microservices logic with high throughput requirements.' 
+    },
+    { 
+        id: 3, 
+        title: 'AI Research Assistant', 
+        company: 'DeepMind', 
+        category: 'AI/ML', 
+        price: 15, 
+        location: 'London, UK (Remote)', 
+        available: 10, 
+        capacity: 10, 
+        date: '2026-08-12', 
+        skills: ['Python', 'PyTorch', 'TensorFlow'], 
+        description: 'Implement neural architectures, run training workflows, and analyze agentic behavioral output datasets.' 
+    },
+    { 
+        id: 4, 
+        title: 'DevOps & Infrastructure Intern', 
+        company: 'HashiCorp', 
+        category: 'DevOps', 
+        price: 15, 
+        location: 'Seattle, WA (Remote)', 
+        available: 4, 
+        capacity: 4, 
+        date: '2026-11-01', 
+        skills: ['Docker', 'Kubernetes', 'Go'], 
+        description: 'Improve developer tooling pipelines and automate resource provisioning systems using modern IAC principles.' 
+    }
 ];
 
 const PORT = process.env.PORT || 5002;
 
-const findEvent = (id) => EVENTS.find((event) => event.id === Number(id));
+const findInternship = (id) => INTERNSHIPS.find((item) => item.id === Number(id));
 
 app.get('/health', (req, res) => {
-    res.json({ service: 'event-service', status: 'ok', events: EVENTS.length });
+    res.json({ service: 'internship-service', status: 'ok', internships: INTERNSHIPS.length });
 });
 
-// Get all events
-app.get('/events', (req, res) => {
-    res.json(EVENTS);
+// Get all internships
+app.get('/internships', (req, res) => {
+    res.json(INTERNSHIPS);
 });
 
-// Get single event details
-app.get('/events/:id', (req, res) => {
-    const event = findEvent(req.params.id);
-    if (!event) return res.status(404).json({ error: 'Event not found' });
-    res.json(event);
+// Get single internship details
+app.get('/internships/:id', (req, res) => {
+    const internship = findInternship(req.params.id);
+    if (!internship) return res.status(404).json({ error: 'Internship not found' });
+    res.json(internship);
 });
 
 // Update availability (Called by Booking Service)
