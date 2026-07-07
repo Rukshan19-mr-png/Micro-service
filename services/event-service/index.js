@@ -65,9 +65,27 @@ app.get('/health', (req, res) => {
     res.json({ service: 'internship-service', status: 'ok', internships: INTERNSHIPS.length });
 });
 
-// Get all internships
+// Get all internships, with optional category filter
 app.get('/internships', (req, res) => {
-    res.json(INTERNSHIPS);
+    const { category, search } = req.query;
+    let results = [...INTERNSHIPS];
+
+    if (category && category !== 'All') {
+        results = results.filter((i) => i.category.toLowerCase() === category.toLowerCase());
+    }
+
+    if (search) {
+        const q = search.toLowerCase();
+        results = results.filter(
+            (i) =>
+                i.title.toLowerCase().includes(q) ||
+                i.company.toLowerCase().includes(q) ||
+                i.location.toLowerCase().includes(q) ||
+                (i.skills || []).some((s) => s.toLowerCase().includes(q))
+        );
+    }
+
+    res.json(results);
 });
 
 // Get single internship details
@@ -77,12 +95,12 @@ app.get('/internships/:id', (req, res) => {
     res.json(internship);
 });
 
-// Post a new internship (Company role)
+// Post a new internship (Company role only)
 app.post('/internships', (req, res) => {
     const { title, company, category, price, location, capacity, skills, description } = req.body;
     
     if (!title || !company || !category || !location || !description) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing required fields: title, company, category, location, description' });
     }
 
     const newInternship = {
@@ -103,42 +121,42 @@ app.post('/internships', (req, res) => {
     res.status(201).json(newInternship);
 });
 
-// Update availability (Called by Booking Service)
-app.patch('/events/:id/book', (req, res) => {
+// Reserve a slot (Called by Booking/Application Service)
+app.patch('/internships/:id/book', (req, res) => {
     const quantity = Number(req.body.quantity || 1);
-    const event = findEvent(req.params.id);
+    const internship = findInternship(req.params.id);
 
-    if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
+    if (!internship) {
+        return res.status(404).json({ error: 'Internship not found' });
     }
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
     }
 
-    if (event.available < quantity) {
-        return res.status(409).json({ error: 'Not enough tickets available', available: event.available });
+    if (internship.available < quantity) {
+        return res.status(409).json({ error: 'Not enough slots available', available: internship.available });
     }
 
-    event.available -= quantity;
-    res.json({ success: true, event, reserved: quantity, remaining: event.available });
+    internship.available -= quantity;
+    res.json({ success: true, internship, reserved: quantity, remaining: internship.available });
 });
 
 // Roll back availability if another service fails after reservation.
-app.patch('/events/:id/release', (req, res) => {
+app.patch('/internships/:id/release', (req, res) => {
     const quantity = Number(req.body.quantity || 1);
-    const event = findEvent(req.params.id);
+    const internship = findInternship(req.params.id);
 
-    if (!event) {
-        return res.status(404).json({ error: 'Event not found' });
+    if (!internship) {
+        return res.status(404).json({ error: 'Internship not found' });
     }
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
     }
 
-    event.available = Math.min(event.capacity, event.available + quantity);
-    res.json({ success: true, event, released: quantity, remaining: event.available });
+    internship.available = Math.min(internship.capacity, internship.available + quantity);
+    res.json({ success: true, internship, released: quantity, remaining: internship.available });
 });
 
-app.listen(PORT, () => console.log(`Event Service running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Internship Service running on port ${PORT}`));
