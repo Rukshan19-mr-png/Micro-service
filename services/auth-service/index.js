@@ -108,7 +108,7 @@ app.post('/auth/login', async (req, res) => {
         const user = await findUserByEmail(email);
         
         if (user && await bcrypt.compare(password, user.password)) {
-            const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+            const token = jwt.sign({ userId: user.id, email: user.email, role: user.role || 'student' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
             return res.json({ token, user: sanitizeUser(user) });
         }
         res.status(401).json({ error: 'Invalid credentials' });
