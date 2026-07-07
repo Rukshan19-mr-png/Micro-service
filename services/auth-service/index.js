@@ -16,16 +16,17 @@ const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 const sanitizeUser = (user) => ({
     id: user.id,
     email: user.email,
+    role: user.role || 'student',
     createdAt: user.created_at || user.createdAt
 });
 
-async function createUser(email, password) {
+async function createUser(email, password, role = 'student') {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     if (db.isReady()) {
         const result = await db.query(
-            'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email, created_at',
-            [email, hashedPassword]
+            'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role, created_at',
+            [email, hashedPassword, role]
         );
         return result.rows[0];
     }
@@ -40,6 +41,7 @@ async function createUser(email, password) {
         id: memoryUsers.length + 1,
         email,
         password: hashedPassword,
+        role,
         createdAt: new Date().toISOString()
     };
     memoryUsers.push(user);
