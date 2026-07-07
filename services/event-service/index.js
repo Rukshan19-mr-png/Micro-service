@@ -77,6 +77,32 @@ app.get('/internships/:id', (req, res) => {
     res.json(internship);
 });
 
+// Post a new internship (Company role)
+app.post('/internships', (req, res) => {
+    const { title, company, category, price, location, capacity, skills, description } = req.body;
+    
+    if (!title || !company || !category || !location || !description) {
+        return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const newInternship = {
+        id: INTERNSHIPS.length + 1,
+        title,
+        company,
+        category,
+        price: Number(price) || 15, // default verification fee
+        location,
+        available: Number(capacity) || 5,
+        capacity: Number(capacity) || 5,
+        date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
+        skills: Array.isArray(skills) ? skills : (skills ? String(skills).split(',').map(s => s.trim()) : []),
+        description
+    };
+
+    INTERNSHIPS.push(newInternship);
+    res.status(201).json(newInternship);
+});
+
 // Update availability (Called by Booking Service)
 app.patch('/events/:id/book', (req, res) => {
     const quantity = Number(req.body.quantity || 1);
