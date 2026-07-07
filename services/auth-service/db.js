@@ -18,9 +18,15 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+        role VARCHAR(50) DEFAULT 'student',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
+    try {
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'student';`);
+    } catch (alterError) {
+      console.warn('Could not alter users table to add role column:', alterError.message);
+    }
     ready = true;
     console.log('Database initialized successfully.');
     return true;
