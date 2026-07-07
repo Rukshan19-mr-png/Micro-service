@@ -78,8 +78,13 @@ app.post('/auth/register', async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
+    const role = String(req.body.role || 'student').trim().toLowerCase();
+    if (!['student', 'company'].includes(role)) {
+        return res.status(400).json({ error: 'Role must be student or company' });
+    }
+
     try {
-        const user = await createUser(email, password);
+        const user = await createUser(email, password, role);
         res.status(201).json({ message: 'User registered successfully', user: sanitizeUser(user) });
     } catch (err) {
         if (err.code === '23505') {
