@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "axios": "latest",
+    "lucide-react": "latest",
+    "nexusevent-monorepo": "file:..",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "latest"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react-swc": "^3.3.2",
