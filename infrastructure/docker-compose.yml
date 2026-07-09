@@ -1,7 +1,4 @@
-version: '3.8'
-
 services:
-  # PostgreSQL database for Auth Service
   postgres-auth:
     image: postgres:15-alpine
     container_name: postgres-auth
@@ -13,6 +10,120 @@ services:
       - "5432:5432"
     volumes:
       - pgdata-auth:/var/lib/postgresql/data
+
+  auth-service:
+    image: node:20-alpine
+    container_name: auth-service
+    working_dir: /app/services/auth-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5001:5001"
+    environment:
+      - PORT=5001
+      - DB_HOST=postgres-auth
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=auth_db
+      - JWT_SECRET=supersecret
+      - JWT_EXPIRES_IN=2h
+    depends_on:
+      - postgres-auth
+    command: sh -c "cd /app/services/auth-service && npm install && npm start"
+
+  event-service:
+    image: node:20-alpine
+    container_name: event-service
+    working_dir: /app/services/event-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5002:5002"
+    environment:
+      - PORT=5002
+    command: sh -c "cd /app/services/event-service && npm install && npm start"
+
+  booking-service:
+    image: node:20-alpine
+    container_name: booking-service
+    working_dir: /app/services/booking-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5003:5003"
+    environment:
+      - PORT=5003
+      - EVENT_SERVICE_URL=http://event-service:5002
+      - PAYMENT_SERVICE_URL=http://payment-service:5004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5005
+    depends_on:
+      - event-service
+      - payment-service
+      - notification-service
+    command: sh -c "cd /app/services/booking-service && npm install && npm start"
+
+  payment-service:
+    image: node:20-alpine
+    container_name: payment-service
+    working_dir: /app/services/payment-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5004:5004"
+    environment:
+      - PORT=5004
+    command: sh -c "cd /app/services/payment-service && npm install && npm start"
+
+  notification-service:
+    image: node:20-alpine
+    container_name: notification-service
+    working_dir: /app/services/notification-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5005:5005"
+    environment:
+      - PORT=5005
+    command: sh -c "cd /app/services/notification-service && npm install && npm start"
+
+  api-gateway:
+    image: node:20-alpine
+    container_name: api-gateway
+    working_dir: /app/api-gateway
+    volumes:
+      - ../:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - AUTH_SERVICE_URL=http://auth-service:5001
+      - EVENT_SERVICE_URL=http://event-service:5002
+      - BOOKING_SERVICE_URL=http://booking-service:5003
+      - PAYMENT_SERVICE_URL=http://payment-service:5004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5005
+      - CORS_ORIGIN=http://localhost:5173
+    depends_on:
+      - auth-service
+      - event-service
+      - booking-service
+      - payment-service
+      - notification-service
+    command: sh -c "cd /app/api-gateway && npm install && node index.js"
+
+  frontend:
+    image: node:20-alpine
+    container_name: frontend
+    working_dir: /app/frontend
+    volumes:
+      - ../:/app
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://api-gateway:8000
+    depends_on:
+      - api-gateway
+    command: sh -c "cd /app/frontend && npm install && npm run dev -- --host 0.0.0.0 --port 5173"
 
 volumes:
   pgdata-auth:
