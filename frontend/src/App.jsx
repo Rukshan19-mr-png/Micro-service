@@ -86,7 +86,23 @@ const App = () => {
     try {
       setErrorMessage('');
       await fetchInternships();
-      if (tkn) await fetchUserData(tkn);
+      if (tkn) {
+        try {
+          await fetchUserData(tkn);
+        } catch (authErr) {
+          // If token is expired or invalid, silently clear it and continue as a guest
+          if (authErr.response?.status === 401) {
+            setToken(null);
+            setCurrentUser(null);
+            setApplications([]);
+            setNotifications([]);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          } else {
+            throw authErr; // Re-throw non-auth errors
+          }
+        }
+      }
       setApiStatus('online');
     } catch (err) {
       setApiStatus('offline');
