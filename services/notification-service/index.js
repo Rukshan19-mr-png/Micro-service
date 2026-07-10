@@ -30,6 +30,10 @@ app.post('/notifications/send', (req, res) => {
     res.status(202).json(notification);
 });
 
+app.get('/notifications', (req, res) => {
+    res.json(notifications);
+});
+
 app.get('/notifications/user/:userId', (req, res) => {
     res.json(notifications.filter((notification) => String(notification.userId) === String(req.params.userId)));
 });

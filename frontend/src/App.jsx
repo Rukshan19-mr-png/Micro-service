@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import {
+  BadgeCheck,
   Bell,
   Briefcase,
   Building2,
@@ -11,20 +12,42 @@ import {
   LogIn,
   LogOut,
   MapPin,
+  Rocket,
   Search,
+  ShieldCheck,
   Sparkles,
+  Star,
+  TrendingUp,
   User,
   X,
   Zap,
 } from 'lucide-react';
 
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const authHeader = (token) => ({ headers: { authorization: `Bearer ${token}` } });
 
 const getStoredUser = () => {
   const storedUser = localStorage.getItem('user');
   return storedUser ? JSON.parse(storedUser) : null;
 };
+
+const PLATFORM_BENEFITS = [
+  {
+    icon: ShieldCheck,
+    title: 'Secure access',
+    description: 'JWT-powered authentication with a protected gateway and role-based routes for students and companies.',
+  },
+  {
+    icon: TrendingUp,
+    title: 'Performance-first',
+    description: 'Fast frontend interactions backed by microservices designed for scalable search and data throughput.',
+  },
+  {
+    icon: Rocket,
+    title: 'Future-ready',
+    description: 'Built with expandable backend services and analytics endpoints for ongoing growth and insight.',
+  },
+];
 
 // ─── Skill Badge Component ───────────────────────────────────────────────────
 const SkillBadge = ({ skill }) => (
@@ -66,10 +89,26 @@ const App = () => {
   const [role, setRole] = useState('student');
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTab, setActiveTab] = useState('browse'); // 'browse' | 'applications'
+  const [metrics, setMetrics] = useState({
+    totalInternships: 0,
+    openSlots: 0,
+    activeCompanies: 0,
+    totalApplications: 0,
+    totalStudents: 0,
+  });
 
   const fetchInternships = async () => {
     const res = await axios.get(`${API_BASE}/internships`);
     setInternships(res.data);
+  };
+
+  const fetchMetrics = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/metrics`);
+      setMetrics(res.data);
+    } catch (err) {
+      console.warn('Unable to retrieve platform metrics:', err.message || err);
+    }
   };
 
   const fetchUserData = async (tkn) => {
@@ -86,6 +125,8 @@ const App = () => {
     try {
       setErrorMessage('');
       await fetchInternships();
+      await fetchMetrics();
+
       if (tkn) {
         try {
           await fetchUserData(tkn);
@@ -266,17 +307,45 @@ const App = () => {
             SkillBridge connects ambitious software engineering students with top-tier companies offering real, paid internship opportunities.
           </p>
 
-          <div className="flex items-center justify-center">
-            <div className="flex items-center bg-white p-2 rounded-2xl shadow-xl border border-slate-100 w-full max-w-md">
-              <Search className="ml-3 text-slate-400 flex-shrink-0" size={20} />
-              <input
-                id="internship-search"
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search roles, companies, skills..."
-                className="w-full p-3 outline-none bg-transparent text-slate-800 placeholder-slate-400"
-              />
+          <div className="flex flex-col gap-6 items-center justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-5xl">
+              <div className="rounded-3xl bg-white/95 border border-slate-200 p-6 shadow-2xl shadow-slate-200/50 backdrop-blur-xl w-full">
+                <p className="text-slate-500 text-sm font-semibold uppercase tracking-[0.24em] mb-3">Platform performance</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div className="rounded-3xl bg-slate-50 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Internships</p>
+                    <p className="mt-3 text-3xl font-bold text-slate-900">{metrics.totalInternships}</p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-50 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Open slots</p>
+                    <p className="mt-3 text-3xl font-bold text-slate-900">{metrics.openSlots}</p>
+                  </div>
+                  <div className="rounded-3xl bg-slate-50 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Companies</p>
+                    <p className="mt-3 text-3xl font-bold text-slate-900">{metrics.activeCompanies}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl bg-indigo-950/95 border border-indigo-800 p-6 text-white shadow-2xl shadow-indigo-500/20 w-full">
+                <p className="text-sm uppercase tracking-[0.24em] text-indigo-300 mb-3">Live platform signal</p>
+                <p className="text-2xl sm:text-3xl font-extrabold leading-tight">High-performance intern matching powered by microservices.</p>
+                <p className="mt-4 text-slate-200 text-sm leading-relaxed">Search faster, apply instantly, and track applications through a secure gateway with distributed backend services.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-center w-full max-w-md">
+              <div className="flex items-center justify-between w-full bg-white p-2 rounded-full border border-slate-200 shadow-sm">
+                <Search className="ml-3 text-slate-400 flex-shrink-0" size={20} />
+                <input
+                  id="internship-search"
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search roles, companies, skills..."
+                  className="w-full p-3 outline-none bg-transparent text-slate-800 placeholder-slate-400"
+                />
+              </div>
             </div>
           </div>
         </header>
@@ -290,6 +359,23 @@ const App = () => {
           <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-medium text-amber-700">
             ⚠️ {errorMessage}
           </div>
+        )}
+
+        {activeTab === 'browse' && (
+          <section className="mb-10 grid gap-4 lg:grid-cols-3">
+            {PLATFORM_BENEFITS.map((benefit) => {
+              const Icon = benefit.icon;
+              return (
+                <div key={benefit.title} className="group rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-2xl">
+                  <div className="inline-flex items-center justify-center h-14 w-14 rounded-3xl bg-indigo-50 text-indigo-600 mb-5 shadow-sm shadow-indigo-100">
+                    <Icon size={24} />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">{benefit.title}</h3>
+                  <p className="text-sm text-slate-500 leading-6">{benefit.description}</p>
+                </div>
+              );
+            })}
+          </section>
         )}
 
         {/* Dashboard Stats */}

@@ -101,6 +101,7 @@ services:
       - BOOKING_SERVICE_URL=http://booking-service:5003
       - PAYMENT_SERVICE_URL=http://payment-service:5004
       - NOTIFICATION_SERVICE_URL=http://notification-service:5005
+      - ANALYTICS_SERVICE_URL=http://analytics-service:5006
       - CORS_ORIGIN=http://localhost:5173
     depends_on:
       - auth-service
@@ -108,7 +109,27 @@ services:
       - booking-service
       - payment-service
       - notification-service
+      - analytics-service
     command: sh -c "cd /app/api-gateway && npm install && node index.js"
+
+  analytics-service:
+    image: node:20-alpine
+    container_name: analytics-service
+    working_dir: /app/services/analytics-service
+    volumes:
+      - ../:/app
+    ports:
+      - "5006:5006"
+    environment:
+      - PORT=5006
+      - EVENT_SERVICE_URL=http://event-service:5002
+      - BOOKING_SERVICE_URL=http://booking-service:5003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:5005
+    depends_on:
+      - event-service
+      - booking-service
+      - notification-service
+    command: sh -c "cd /app/services/analytics-service && npm install && npm start"
 
   frontend:
     image: node:20-alpine
