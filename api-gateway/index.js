@@ -17,7 +17,8 @@ const SERVICES = {
     internships: process.env.EVENT_SERVICE_URL || 'http://localhost:5002',
     applications: process.env.BOOKING_SERVICE_URL || 'http://localhost:5003',
     payments: process.env.PAYMENT_SERVICE_URL || 'http://localhost:5004',
-    notifications: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5005'
+    notifications: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:5005',
+    analytics: process.env.ANALYTICS_SERVICE_URL || 'http://localhost:5006'
 };
 
 const forwardError = (res, err, fallback) => {
@@ -176,6 +177,17 @@ app.get('/api/notifications', authenticate, async (req, res) => {
         res.status(response.status).json(response.data);
     } catch (err) {
         forwardError(res, err, 'Notification Service Error');
+    }
+});
+
+// ─── Analytics Routes ───────────────────────────────────────────────────────
+
+app.get('/api/metrics', async (req, res) => {
+    try {
+        const response = await axios.get(`${SERVICES.analytics}/metrics`);
+        res.status(response.status).json(response.data);
+    } catch (err) {
+        forwardError(res, err, 'Analytics Service Error');
     }
 });
 

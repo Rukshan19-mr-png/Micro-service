@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "description": "Microservices Ticketing Platform",
   "scripts": {
-    "install:all": "npm install --prefix api-gateway && npm install --prefix services/auth-service && npm install --prefix services/event-service && npm install --prefix services/booking-service && npm install --prefix services/payment-service && npm install --prefix services/notification-service",
+    "install:all": "npm install --prefix api-gateway && npm install --prefix services/auth-service && npm install --prefix services/event-service && npm install --prefix services/booking-service && npm install --prefix services/payment-service && npm install --prefix services/notification-service && npm install --prefix services/analytics-service",
     "start:auth": "node services/auth-service/index.js",
     "start:events": "node services/event-service/index.js",
     "start:bookings": "node services/booking-service/index.js",
     "start:payments": "node services/payment-service/index.js",
     "start:notifications": "node services/notification-service/index.js",
+    "start:analytics": "node services/analytics-service/index.js",
     "start:gateway": "node api-gateway/index.js",
-    "start:all": "concurrently \"npm run start:auth\" \"npm run start:events\" \"npm run start:bookings\" \"npm run start:payments\" \"npm run start:notifications\" \"npm run start:gateway\"",
+    "start:all": "concurrently \"npm run start:auth\" \"npm run start:events\" \"npm run start:bookings\" \"npm run start:payments\" \"npm run start:notifications\" \"npm run start:analytics\" \"npm run start:gateway\"",
     "docker:up": "docker compose -f infrastructure/docker-compose.yml up --build",
     "docker:down": "docker compose -f infrastructure/docker-compose.yml down"
   },
