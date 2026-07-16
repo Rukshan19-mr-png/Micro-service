@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-const apiTarget = process.env.VITE_API_URL || 'http://localhost:8000'
+const apiTarget = process.env.API_GATEWAY_URL || process.env.VITE_API_URL || 'http://localhost:8000'
 
 export default defineConfig({
   plugins: [react()],
