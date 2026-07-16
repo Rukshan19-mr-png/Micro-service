@@ -31,6 +31,14 @@ services:
       - postgres-auth
     command: sh -c "cd /app/services/auth-service && npm install && npm start"
 
+  mongo:
+    image: mongo:latest
+    container_name: mongo-events
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata-events:/data/db
+
   event-service:
     image: node:20-alpine
     container_name: event-service
@@ -41,6 +49,9 @@ services:
       - "5002:5002"
     environment:
       - PORT=5002
+      - MONGO_URI=mongodb://mongo:27017/event_db
+    depends_on:
+      - mongo
     command: sh -c "cd /app/services/event-service && npm install && npm start"
 
   booking-service:
@@ -141,10 +152,12 @@ services:
       - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - VITE_API_URL=http://api-gateway:8000
+      - API_GATEWAY_URL=http://api-gateway:8000
+      - VITE_API_URL=/api
     depends_on:
       - api-gateway
     command: sh -c "cd /app/frontend && npm install && npm run dev -- --host 0.0.0.0 --port 5173"
 
 volumes:
   pgdata-auth:
+  mongodata-events:
