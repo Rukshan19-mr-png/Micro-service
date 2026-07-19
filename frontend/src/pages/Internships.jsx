@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Search, Briefcase, MapPin, Loader2, Zap, BadgeCheck, CheckCircle2 } from 'lucide-react';
+import { Search, Briefcase, MapPin, Loader2, Zap, BadgeCheck, CheckCircle2, User, Mail, Phone, FileText, X, Send } from 'lucide-react';
 import StatusBanner from '../components/StatusBanner';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -22,6 +22,19 @@ const Internships = ({ onOpenAuth }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [apiStatus, setApiStatus] = useState('checking');
   const [errorMessage, setErrorMessage] = useState('');
+  const [selectedInternship, setSelectedInternship] = useState(null);
+  const [appForm, setAppForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    location: '',
+    skills: '',
+    experience: '',
+    coverLetter: ''
+  });
+  const [cvName, setCvName] = useState('');
+  const [cvBase64, setCvBase64] = useState('');
+  const [submittingApplication, setSubmittingApplication] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +58,7 @@ const Internships = ({ onOpenAuth }) => {
     fetchData();
   }, [token]);
 
-  const handleApply = async (internshipId) => {
+  const handleOpenApplicationModal = (internship) => {
     if (!token) {
       onOpenAuth();
       return;
@@ -54,27 +67,86 @@ const Internships = ({ onOpenAuth }) => {
       alert('Company accounts cannot apply for internships. Switch to a student account.');
       return;
     }
-    
+
+    setSelectedInternship(internship);
+    setAppForm({
+      fullName: currentUser?.name || currentUser?.email?.split('@')[0] || '',
+      email: currentUser?.email || '',
+      phone: '',
+      location: '',
+      skills: '',
+      experience: '',
+      coverLetter: ''
+    });
+    setCvName('');
+    setCvBase64('');
+    setErrorMessage('');
+  };
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCvBase64(reader.result);
+      setCvName(file.name);
+    };
+    reader.onerror = () => {
+      alert('Unable to read the selected file. Please try again.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const updateApplicantField = (field) => (event) => {
+    setAppForm((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleApplicationSubmit = async (event) => {
+    event.preventDefault();
+    if (!selectedInternship) return;
+    if (!cvBase64) {
+      alert('Please upload your CV before submitting your application.');
+      return;
+    }
+
+    const requiredFields = [appForm.fullName, appForm.email, appForm.phone, appForm.location, appForm.experience, appForm.coverLetter];
+    if (requiredFields.some((value) => String(value).trim() === '')) {
+      alert('Please complete all applicant details before submitting.');
+      return;
+    }
+
     try {
-      setApplyingId(internshipId);
+      setSubmittingApplication(true);
       await axios.post(
         `${API_BASE}/bookings`,
         {
-          eventId: internshipId,
+          eventId: selectedInternship.id,
           quantity: 1,
           paymentDetails: { cardNumber: '4111-1111-1111-1111', expiry: '12/28', cvv: '123' },
+          applicant: {
+            fullName: appForm.fullName.trim(),
+            email: appForm.email.trim(),
+            phone: appForm.phone.trim(),
+            location: appForm.location.trim(),
+            skills: appForm.skills.split(',').map((skill) => skill.trim()).filter(Boolean),
+            experience: appForm.experience.trim(),
+            coverLetter: appForm.coverLetter.trim(),
+            cvName,
+            cvData: cvBase64
+          }
         },
         authHeader()
       );
-      
-      // Refresh applications
+
       const appRes = await axios.get(`${API_BASE}/bookings`, authHeader());
       setApplications(appRes.data);
-      
+      setSelectedInternship(null);
+      alert('Application submitted successfully.');
     } catch (err) {
       alert(`Application failed: ${err.response?.data?.details || err.response?.data?.error || err.message}`);
     } finally {
-      setApplyingId(null);
+      setSubmittingApplication(false);
     }
   };
 
@@ -213,7 +285,7 @@ const Internships = ({ onOpenAuth }) => {
                         </button>
                       ) : isStudent && internship.available > 0 ? (
                         <button
-                          onClick={() => handleApply(internship.id)}
+                          onClick={() => handleOpenApplicationModal(internship)}
                           disabled={applyingId === internship.id}
                           className="bg-slate-900 hover:bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-semibold shadow-md transition-all active:scale-95 disabled:opacity-70 flex items-center justify-center"
                         >
@@ -228,6 +300,77 @@ const Internships = ({ onOpenAuth }) => {
           </div>
         )}
       </div>
+
+      {selectedInternship && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 px-4 py-6">
+          <div className="w-full max-w-2xl rounded-3xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
+            <div className="flex items-start justify-between border-b border-slate-200 p-6">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-indigo-600">Application Form</p>
+                <h2 className="mt-2 text-2xl font-bold text-slate-900">Apply for {selectedInternship.title}</h2>
+                <p className="mt-2 text-sm text-slate-500">Share details that help the team evaluate your fit for this role and upload your CV.</p>
+              </div>
+              <button type="button" onClick={() => setSelectedInternship(null)} className="rounded-full p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleApplicationSubmit} className="space-y-5 p-6">
+              <div className="grid gap-4 md:grid-cols-2">
+                <label className="block text-sm font-medium text-slate-700">
+                  <span className="mb-2 flex items-center gap-2"><User size={16} /> Full name</span>
+                  <input required value={appForm.fullName} onChange={updateApplicantField('fullName')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Enter your full name" />
+                </label>
+
+                <label className="block text-sm font-medium text-slate-700">
+                  <span className="mb-2 flex items-center gap-2"><Mail size={16} /> Email</span>
+                  <input required type="email" value={appForm.email} onChange={updateApplicantField('email')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="your@email.com" />
+                </label>
+
+                <label className="block text-sm font-medium text-slate-700">
+                  <span className="mb-2 flex items-center gap-2"><Phone size={16} /> Phone</span>
+                  <input required value={appForm.phone} onChange={updateApplicantField('phone')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Phone number" />
+                </label>
+
+                <label className="block text-sm font-medium text-slate-700">
+                  <span className="mb-2 flex items-center gap-2"><MapPin size={16} /> Location</span>
+                  <input required value={appForm.location} onChange={updateApplicantField('location')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="City / Country" />
+                </label>
+              </div>
+
+              <label className="block text-sm font-medium text-slate-700">
+                <span className="mb-2 flex items-center gap-2"><Briefcase size={16} /> Skills</span>
+                <input value={appForm.skills} onChange={updateApplicantField('skills')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="React, Node.js, UI/UX" />
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                <span className="mb-2 flex items-center gap-2"><FileText size={16} /> Relevant experience</span>
+                <textarea required rows="3" value={appForm.experience} onChange={updateApplicantField('experience')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Briefly describe your experience and achievements" />
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                <span className="mb-2 flex items-center gap-2"><Send size={16} /> Motivation / cover letter</span>
+                <textarea required rows="4" value={appForm.coverLetter} onChange={updateApplicantField('coverLetter')} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" placeholder="Tell us why you're a strong fit for this opportunity" />
+              </label>
+
+              <label className="block text-sm font-medium text-slate-700">
+                <span className="mb-2 flex items-center gap-2"><FileText size={16} /> Upload CV</span>
+                <input type="file" accept=".pdf,.doc,.docx" onChange={handleFileUpload} className="mt-2 block w-full rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-3 text-sm text-slate-600" />
+                <p className="mt-2 text-xs text-slate-500">Accepted formats: PDF, DOC, DOCX</p>
+                {cvName && <p className="mt-2 text-sm font-medium text-emerald-600">Selected file: {cvName}</p>}
+              </label>
+
+              <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+                <button type="button" onClick={() => setSelectedInternship(null)} className="rounded-xl border border-slate-200 px-4 py-2.5 font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="submit" disabled={submittingApplication} className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 font-semibold text-white shadow-md shadow-indigo-200 hover:bg-indigo-700 disabled:opacity-70">
+                  {submittingApplication ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />} 
+                  {submittingApplication ? 'Submitting...' : 'Submit Application'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

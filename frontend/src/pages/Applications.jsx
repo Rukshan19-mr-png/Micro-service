@@ -71,7 +71,26 @@ const Applications = () => {
                     {app.status}
                   </div>
                   <span className="text-slate-900 font-bold">${app.totalAmount} Paid</span>
+                  {app.applicant?.cvName && <span className="mt-2 text-sm font-medium text-indigo-600">CV: {app.applicant.cvName}</span>}
                 </div>
+              </div>
+              <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <p className="font-semibold text-slate-900">Applicant details</p>
+                    <p className="mt-1">Name: {app.applicant?.fullName || 'Not provided'}</p>
+                    <p>Email: {app.applicant?.email || 'Not provided'}</p>
+                    <p>Phone: {app.applicant?.phone || 'Not provided'}</p>
+                    <p>Location: {app.applicant?.location || 'Not provided'}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">Interview notes</p>
+                    <p className="mt-1">Skills: {app.applicant?.skills?.join(', ') || 'Not provided'}</p>
+                    <p>Experience: {app.applicant?.experience || 'Not provided'}</p>
+                    <p className="mt-2 text-slate-500">{app.applicant?.coverLetter || 'No cover letter provided.'}</p>
+                  </div>
+                </div>
+              </div>
               </div>
             ))}
           </div>
