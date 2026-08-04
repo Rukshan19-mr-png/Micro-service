@@ -2,89 +2,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── Google Fonts Import ─────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-:root {
-  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light;
-  background-color: #eef2ff;
-  background-image: radial-gradient(circle at top right, rgba(99, 102, 241, 0.12), transparent 26%), radial-gradient(circle at bottom left, rgba(124, 58, 237, 0.12), transparent 28%);
+@layer utilities {
+  .animate-in {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  .slide-in-bottom-4 {
+    animation-name: slideInBottom;
+  }
+  .animate-gradient-x {
+    animation: gradient-x 15s ease infinite;
+    background-size: 200% 200%;
+  }
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-image: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.08), transparent 30%), radial-gradient(circle at 85% 10%, rgba(124, 58, 237, 0.1), transparent 24%), radial-gradient(circle at 40% 90%, rgba(139, 92, 246, 0.06), transparent 18%);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* ─── Glassmorphism Utility ───────────────────────────────────────────────── */
-.glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+@keyframes slideInBottom {
+  from {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
-/* ─── Line Clamp Utility ──────────────────────────────────────────────────── */
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
-/* ─── Smooth Scroll ───────────────────────────────────────────────────────── */
 html {
   scroll-behavior: smooth;
 }
 
-/* ─── Focus Visible Ring (Accessibility) ─────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ─── Custom Scrollbar ────────────────────────────────────────────────────── */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-::-webkit-scrollbar-thumb {
-  background: #c7d2fe;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
-}
-
-/* ─── Card hover animation ────────────────────────────────────────────────── */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fade-in-up {
-  animation: fadeInUp 0.4s ease-out forwards;
-}
-
-/* ─── Gradient text utility ───────────────────────────────────────────────── */
-.gradient-text {
-  background: linear-gradient(135deg, #6366f1, #7c3aed);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+body {
+  @apply antialiased text-slate-800 selection:bg-indigo-200 selection:text-indigo-900;
 }
