@@ -32,6 +32,21 @@ app.post('/bookings', async (req, res) => {
     const userRole = req.body.userRole;
     const quantity = Number(req.body.quantity || 1);
     const { paymentDetails } = req.body;
+    const applicant = req.body.applicant || {};
+    const fullName = String(applicant.fullName || '').trim();
+    const email = String(applicant.email || '').trim();
+    const phone = String(applicant.phone || '').trim();
+    const location = String(applicant.location || '').trim();
+    const skills = Array.isArray(applicant.skills)
+        ? applicant.skills
+        : String(applicant.skills || '')
+            .split(',')
+            .map((skill) => skill.trim())
+            .filter(Boolean);
+    const experience = String(applicant.experience || '').trim();
+    const coverLetter = String(applicant.coverLetter || '').trim();
+    const cvName = String(applicant.cvName || '').trim();
+    const cvData = String(applicant.cvData || '').trim();
 
     if (!Number.isInteger(internshipId) || internshipId < 1) {
         return res.status(400).json({ error: 'A valid internship ID (eventId) is required' });
@@ -48,6 +63,10 @@ app.post('/bookings', async (req, res) => {
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
+    }
+
+    if (!fullName || !email || !phone || !location || !experience || !coverLetter || !cvName) {
+        return res.status(400).json({ error: 'Please complete all applicant details and upload a CV' });
     }
 
     let reservationCreated = false;
@@ -78,7 +97,18 @@ app.post('/bookings', async (req, res) => {
             totalAmount: internship.price * quantity,
             status: 'APPLIED',
             transactionId: paymentResponse.data.transactionId,
-            appliedAt: new Date().toISOString()
+            appliedAt: new Date().toISOString(),
+            applicant: {
+                fullName,
+                email,
+                phone,
+                location,
+                skills,
+                experience,
+                coverLetter,
+                cvName,
+                cvData
+            }
         };
         APPLICATIONS.push(application);
 
