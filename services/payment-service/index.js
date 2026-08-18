@@ -11,17 +11,31 @@ app.get('/health', (req, res) => {
 
 app.post('/payments/process', (req, res) => {
     const { amount, paymentDetails } = req.body;
-    const cardNumber = String(paymentDetails?.cardNumber || '').replace(/\D/g, '');
     
     if (!Number.isFinite(Number(amount)) || Number(amount) < 0) {
         return res.status(400).json({ status: 'FAILED', error: 'A valid amount is required' });
     }
 
+    // If amount is 0, application is completely free
+    if (Number(amount) === 0) {
+        const freePayment = {
+            status: 'SUCCESS',
+            transactionId: 'FREE_' + Date.now().toString(36).toUpperCase(),
+            amount: 0,
+            cardLast4: 'FREE',
+            processedAt: new Date().toISOString()
+        };
+        payments.push(freePayment);
+        return res.json(freePayment);
+    }
+
+    const cardNumber = String(paymentDetails?.cardNumber || '').replace(/\D/g, '');
+
     if (!cardNumber || cardNumber.length < 12) {
         return res.status(400).json({ status: 'FAILED', error: 'Missing payment details' });
     }
 
-    if (!paymentDetails.expiry || !paymentDetails.cvv) {
+    if (!paymentDetails?.expiry || !paymentDetails?.cvv) {
         return res.status(400).json({ status: 'FAILED', error: 'Incomplete payment details' });
     }
     
