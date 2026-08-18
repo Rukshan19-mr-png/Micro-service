@@ -58,27 +58,27 @@ const Home = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24 relative z-10 text-center">
           <div className="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 font-semibold text-sm mb-6 border border-indigo-100">
             <Zap className="w-4 h-4 text-indigo-500 fill-indigo-500" />
-            <span>v2.0 Beta Live</span>
+            <span>🇱🇰 Sri Lanka Tech & Global Remote Hub</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-extrabold text-slate-900 tracking-tight mb-8">
-            The next generation of <br className="hidden md:block" />
+            Empowering Global & Local <br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 animate-gradient-x">
-              Event Management
+              Tech Internships
             </span>
           </h1>
           
           <p className="mt-4 max-w-2xl text-xl text-slate-500 mx-auto mb-10">
-            Connect students and companies instantly with our scalable microservices platform. Build, browse, and book with complete confidence.
+            Discover opportunities at top Sri Lankan companies (WSO2, Virtusa, Sysco LABS, IFS, Dialog, PickMe) and global tech giants. Apply locally onsite or work remotely from anywhere worldwide.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
             <Link to="/internships" className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-4 rounded-xl font-semibold shadow-lg shadow-indigo-200 hover:shadow-xl transition-all active:scale-95 text-lg">
-              <span>Browse Internships</span>
+              <span>Explore Opportunities</span>
               <ArrowRight className="w-5 h-5" />
             </Link>
             <a href="#architecture" className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-white text-slate-700 hover:text-indigo-600 px-8 py-4 rounded-xl font-semibold border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50 transition-all active:scale-95 text-lg">
-              Explore Architecture
+              Explore Platform Architecture
             </a>
           </div>
           
