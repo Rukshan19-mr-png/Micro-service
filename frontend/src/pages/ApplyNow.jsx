@@ -8,7 +8,17 @@ import {
   BadgeCheck, AlertCircle, Loader2, FileCheck
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api';
+const isLocalPhone = (phoneStr) => {
+  if (!phoneStr) return true;
+  const clean = String(phoneStr).replace(/[\s\-\(\)]/g, '');
+  if (clean.startsWith('+94') || clean.startsWith('94') || clean.startsWith('07') || clean.startsWith('011') || clean.startsWith('01') || clean.startsWith('03') || clean.startsWith('08') || clean.startsWith('09')) {
+    return true;
+  }
+  if (clean.startsWith('+') || (clean.length >= 10 && !clean.startsWith('0'))) {
+    return false;
+  }
+  return true;
+};
 
 const ApplyNow = ({ onOpenAuth }) => {
   const { id } = useParams();
@@ -27,6 +37,9 @@ const ApplyNow = ({ onOpenAuth }) => {
     email: '',
     phone: '',
     location: '',
+    countryOfOrigin: 'Sri Lanka',
+    workArrangement: 'Online Remote',
+    timezoneAvailability: 'IST (UTC+5:30) / Flexible',
     skills: '',
     experience: '',
     coverLetter: '',
@@ -54,6 +67,9 @@ const ApplyNow = ({ onOpenAuth }) => {
         setLoading(true);
         const res = await axios.get(`${API_BASE}/internships/${id}`);
         setInternship(res.data);
+        if (res.data?.workMode) {
+          setForm(prev => ({ ...prev, workArrangement: res.data.workMode }));
+        }
       } catch (err) {
         setErrorMessage(err.response?.data?.error || 'Failed to load internship details');
       } finally {
@@ -90,6 +106,7 @@ const ApplyNow = ({ onOpenAuth }) => {
     if (!form.email.trim() || !/\S+@\S+\.\S+/.test(form.email)) return 'A valid Email address is required';
     if (!form.phone.trim()) return 'Phone Number is required';
     if (!form.location.trim()) return 'Location is required';
+    if (!form.countryOfOrigin.trim()) return 'Country of Origin / Nationality is required';
     if (!cvBase64) return 'Please upload your CV before proceeding';
     return null;
   };
@@ -149,6 +166,9 @@ const ApplyNow = ({ onOpenAuth }) => {
             email: form.email.trim(),
             phone: form.phone.trim(),
             location: form.location.trim(),
+            countryOfOrigin: form.countryOfOrigin,
+            workArrangement: form.workArrangement,
+            timezoneAvailability: form.timezoneAvailability,
             skills: form.skills.split(',').map((s) => s.trim()).filter(Boolean),
             experience: form.experience.trim(),
             coverLetter: form.coverLetter.trim(),
@@ -247,7 +267,13 @@ const ApplyNow = ({ onOpenAuth }) => {
                 </div>
                 <div className="flex items-center gap-3">
                   <CreditCard size={16} className="text-indigo-300" />
-                  <span>Verification Fee: ${internship?.price}</span>
+                  <span>
+                    {!isLocalPhone(form.phone) ? (
+                      <>Foreign Worker Fee: <strong className="text-amber-300">$15 USD</strong></>
+                    ) : (
+                      <>Local Candidate Fee: <strong className="text-emerald-300">FREE ($0)</strong></>
+                    )}
+                  </span>
                 </div>
               </div>
 
@@ -354,7 +380,18 @@ const ApplyNow = ({ onOpenAuth }) => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Phone Number *</label>
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label className="block text-sm font-semibold text-slate-700">Phone Number *</label>
+                          {form.phone && (
+                            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md ${
+                              isLocalPhone(form.phone)
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-amber-50 text-amber-800 border border-amber-200'
+                            }`}>
+                              {isLocalPhone(form.phone) ? '🇱🇰 Local Candidate (FREE)' : '✈️ Foreign Candidate ($15 USD Fee)'}
+                            </span>
+                          )}
+                        </div>
                         <div className="relative">
                           <Phone size={18} className="absolute left-3.5 top-3.5 text-slate-400" />
                           <input
@@ -363,13 +400,13 @@ const ApplyNow = ({ onOpenAuth }) => {
                             value={form.phone}
                             onChange={handleInputChange('phone')}
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800"
-                            placeholder="+1 (555) 000-0000"
+                            placeholder="+94 77 123 4567 or +1 (555) 000-0000"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Current Location *</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Current City & Residence *</label>
                         <div className="relative">
                           <MapPin size={18} className="absolute left-3.5 top-3.5 text-slate-400" />
                           <input
@@ -378,9 +415,41 @@ const ApplyNow = ({ onOpenAuth }) => {
                             value={form.location}
                             onChange={handleInputChange('location')}
                             className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800"
-                            placeholder="San Francisco, CA"
+                            placeholder="Colombo, Sri Lanka or London, UK"
                           />
                         </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Country of Origin / Citizenship *</label>
+                        <select
+                          value={form.countryOfOrigin}
+                          onChange={handleInputChange('countryOfOrigin')}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800 bg-white font-medium"
+                        >
+                          <option value="Sri Lanka">🇱🇰 Sri Lanka (Local Citizen)</option>
+                          <option value="India">🇮🇳 India</option>
+                          <option value="United States">🇺🇸 United States</option>
+                          <option value="United Kingdom">🇬🇧 United Kingdom</option>
+                          <option value="Germany">🇩🇪 Germany</option>
+                          <option value="Australia">🇦🇺 Australia</option>
+                          <option value="Canada">🇨🇦 Canada</option>
+                          <option value="Singapore">🇸🇬 Singapore</option>
+                          <option value="Other Foreign Country">🌍 Other International Worker</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1.5">Preferred Work Arrangement *</label>
+                        <select
+                          value={form.workArrangement}
+                          onChange={handleInputChange('workArrangement')}
+                          className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800 bg-white font-medium"
+                        >
+                          <option value="Online (Remote)">🌐 Online Remote (Foreign & Local)</option>
+                          <option value="Onsite">🏢 Onsite (Sri Lanka Office)</option>
+                          <option value="Hybrid">🔀 Hybrid (3 Days Office / 2 Days Remote)</option>
+                        </select>
                       </div>
                     </div>
 
@@ -491,8 +560,8 @@ const ApplyNow = ({ onOpenAuth }) => {
                 {step === 3 && (
                   <div className="space-y-6 animate-in fade-in duration-300">
                     <div className="border-b border-slate-100 pb-4">
-                      <h3 className="text-lg font-bold text-slate-900">Step 3: Verification & Submission</h3>
-                      <p className="text-slate-500 text-sm">Review your application details and complete verification fee process.</p>
+                      <h3 className="text-lg font-bold text-slate-900">Step 3: Free Application Confirmation</h3>
+                      <p className="text-slate-500 text-sm">Review your application details before final submission.</p>
                     </div>
 
                     {/* Application Summary Box */}
@@ -500,52 +569,69 @@ const ApplyNow = ({ onOpenAuth }) => {
                       <p className="font-bold text-slate-800 uppercase tracking-wider text-xs mb-3 text-indigo-600">Application Summary</p>
                       <p><span className="font-semibold text-slate-700">Role:</span> {internship?.title} ({internship?.company})</p>
                       <p><span className="font-semibold text-slate-700">Applicant Name:</span> {form.fullName}</p>
-                      <p><span className="font-semibold text-slate-700">Email:</span> {form.email}</p>
+                      <p><span className="font-semibold text-slate-700">Contact Phone:</span> {form.phone} ({isLocalPhone(form.phone) ? '🇱🇰 Local Candidate' : '✈️ Foreign Candidate'})</p>
+                      <p><span className="font-semibold text-slate-700">Work Arrangement:</span> {form.workArrangement}</p>
                       <p><span className="font-semibold text-slate-700">Attached Resume:</span> {cvName}</p>
                     </div>
 
-                    {/* Verification Fee Payment Box */}
-                    <div className="border border-indigo-100 bg-indigo-50/50 p-5 rounded-2xl space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-slate-900 font-bold">
-                          <CreditCard className="text-indigo-600" size={20} />
-                          <span>Platform Verification Fee</span>
+                    {/* Conditional Payment / Free Notice Banner based on Applicant Phone Identification */}
+                    {!isLocalPhone(form.phone) ? (
+                      <div className="border border-amber-200 bg-amber-50/70 p-5 rounded-2xl space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 text-amber-950 font-bold">
+                            <CreditCard className="text-amber-600" size={20} />
+                            <span>Foreign Applicant International Verification Fee</span>
+                          </div>
+                          <span className="text-xl font-black text-amber-700">$15 USD</span>
                         </div>
-                        <span className="text-xl font-black text-indigo-600">${internship?.price}</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="sm:col-span-2">
-                          <label className="block text-xs font-bold text-slate-600 mb-1">Card Number</label>
-                          <input
-                            type="text"
-                            value={form.cardNumber}
-                            onChange={handleInputChange('cardNumber')}
-                            className="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white"
-                          />
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1">Expiry</label>
+                        <p className="text-xs text-amber-800">
+                          Identified as an international foreign candidate ({form.phone}). Foreign applicant processing includes international identity check and platform verification. Local Sri Lankan candidate applications (+94 / 07...) remain 100% free across all companies.
+                        </p>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                          <div className="sm:col-span-2">
+                            <label className="block text-xs font-bold text-slate-600 mb-1">Test Card Number</label>
                             <input
                               type="text"
-                              value={form.cardExpiry}
-                              onChange={handleInputChange('cardExpiry')}
-                              className="w-full px-2 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white text-center"
+                              value={form.cardNumber}
+                              onChange={handleInputChange('cardNumber')}
+                              className="w-full px-3 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white"
                             />
                           </div>
-                          <div>
-                            <label className="block text-xs font-bold text-slate-600 mb-1">CVV</label>
-                            <input
-                              type="text"
-                              value={form.cardCvv}
-                              onChange={handleInputChange('cardCvv')}
-                              className="w-full px-2 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white text-center"
-                            />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-bold text-slate-600 mb-1">Expiry</label>
+                              <input
+                                type="text"
+                                value={form.cardExpiry}
+                                onChange={handleInputChange('cardExpiry')}
+                                className="w-full px-2 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white text-center"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold text-slate-600 mb-1">CVV</label>
+                              <input
+                                type="text"
+                                value={form.cardCvv}
+                                onChange={handleInputChange('cardCvv')}
+                                className="w-full px-2 py-2 rounded-lg border border-slate-200 font-mono text-sm bg-white text-center"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="border border-emerald-200 bg-emerald-50/70 p-5 rounded-2xl flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-bold text-xl flex-shrink-0 shadow-md">
+                          🇱🇰
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-emerald-900 text-base">100% Free Application for Local Candidates</h4>
+                          <p className="text-emerald-700 text-sm mt-0.5">
+                            Local Sri Lankan applicant phone number identified ({form.phone}). Your application to {internship?.company} is completely free of charge!
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="flex items-center justify-between pt-4">
                       <button
@@ -559,10 +645,12 @@ const ApplyNow = ({ onOpenAuth }) => {
                       <button
                         type="submit"
                         disabled={submitting}
-                        className="flex items-center justify-center gap-2 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-70"
+                        className={`flex items-center justify-center gap-2 px-8 py-3.5 text-white font-bold rounded-xl shadow-lg transition-all active:scale-95 disabled:opacity-70 ${
+                          !isLocalPhone(form.phone) ? 'bg-indigo-600 hover:bg-indigo-700 shadow-indigo-200' : 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-200'
+                        }`}
                       >
                         {submitting ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
-                        {submitting ? 'Verifying & Submitting...' : 'Complete & Submit Application'}
+                        {submitting ? 'Processing Application...' : (!isLocalPhone(form.phone) ? 'Pay $15 USD & Submit' : 'Submit Application (Free)')}
                       </button>
                     </div>
                   </div>
