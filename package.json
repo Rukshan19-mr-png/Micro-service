@@ -13,13 +13,17 @@
     "start:gateway": "node api-gateway/index.js",
     "start:all": "concurrently \"npm run start:auth\" \"npm run start:events\" \"npm run start:bookings\" \"npm run start:payments\" \"npm run start:notifications\" \"npm run start:analytics\" \"npm run start:gateway\"",
     "docker:up": "docker compose -f infrastructure/docker-compose.yml up --build",
-    "docker:down": "docker compose -f infrastructure/docker-compose.yml down"
+    "docker:down": "docker compose -f infrastructure/docker-compose.yml down",
+    "build": "npm run build --prefix frontend",
+    "vercel-build": "npm run build --prefix frontend"
   },
   "dependencies": {
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "concurrently": "^8.2.0",
     "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3"
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.7.3",
+    "pg": "^8.22.0"
   }
 }
