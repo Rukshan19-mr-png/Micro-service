@@ -8,6 +8,8 @@ import {
   BadgeCheck, AlertCircle, Loader2, FileCheck
 } from 'lucide-react';
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
 const isLocalPhone = (phoneStr) => {
   if (!phoneStr) return true;
   const clean = String(phoneStr).replace(/[\s\-\(\)]/g, '');
