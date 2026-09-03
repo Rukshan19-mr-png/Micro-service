@@ -327,40 +327,60 @@ const INTERNSHIPS = [
     }
 ];
 
+const db = require('./db');
 const PORT = process.env.PORT || 5002;
 
-const findInternship = (id) => INTERNSHIPS.find((item) => item.id === Number(id));
+const getInternships = async () => {
+    if (db.isReady()) {
+        const docs = await db.Internship.find().sort({ id: 1 }).lean();
+        return docs;
+    }
+    return INTERNSHIPS;
+};
 
-app.get('/health', (req, res) => {
-    res.json({ service: 'internship-service', status: 'ok', internships: INTERNSHIPS.length });
+const findInternship = async (id) => {
+    const numericId = Number(id);
+    if (db.isReady()) {
+        return await db.Internship.findOne({ id: numericId }).lean();
+    }
+    return INTERNSHIPS.find((item) => item.id === numericId);
+};
+
+app.get('/health', async (req, res) => {
+    const list = await getInternships();
+    res.json({
+        service: 'internship-service',
+        status: 'ok',
+        storage: db.isReady() ? 'mongodb' : 'memory',
+        internships: list.length
+    });
 });
 
 // Get all internships with multi-criteria filters
-app.get('/internships', (req, res) => {
+app.get('/internships', async (req, res) => {
     const { category, search, workMode, applicantOrigin } = req.query;
-    let results = [...INTERNSHIPS];
+    let results = await getInternships();
 
     if (category && category !== 'All') {
-        results = results.filter((i) => i.category.toLowerCase() === category.toLowerCase());
+        results = results.filter((i) => i.category && i.category.toLowerCase() === category.toLowerCase());
     }
 
     if (workMode && workMode !== 'All') {
-        results = results.filter((i) => i.workMode.toLowerCase().includes(workMode.toLowerCase()));
+        results = results.filter((i) => i.workMode && i.workMode.toLowerCase().includes(workMode.toLowerCase()));
     }
 
     if (applicantOrigin === 'foreign') {
-        // Foreign applicants can only apply for Online / Global remote roles
-        results = results.filter((i) => i.eligibleApplicants.includes('Global') || i.workMode.includes('Online'));
+        results = results.filter((i) => (i.eligibleApplicants && i.eligibleApplicants.includes('Global')) || (i.workMode && i.workMode.includes('Online')));
     }
 
     if (search) {
         const q = search.toLowerCase();
         results = results.filter(
             (i) =>
-                i.title.toLowerCase().includes(q) ||
-                i.company.toLowerCase().includes(q) ||
-                i.location.toLowerCase().includes(q) ||
-                i.workMode.toLowerCase().includes(q) ||
+                (i.title && i.title.toLowerCase().includes(q)) ||
+                (i.company && i.company.toLowerCase().includes(q)) ||
+                (i.location && i.location.toLowerCase().includes(q)) ||
+                (i.workMode && i.workMode.toLowerCase().includes(q)) ||
                 (i.skills || []).some((s) => s.toLowerCase().includes(q))
         );
     }
@@ -369,74 +389,99 @@ app.get('/internships', (req, res) => {
 });
 
 // Get single internship details
-app.get('/internships/:id', (req, res) => {
-    const internship = findInternship(req.params.id);
+app.get('/internships/:id', async (req, res) => {
+    const internship = await findInternship(req.params.id);
     if (!internship) return res.status(404).json({ error: 'Internship not found' });
     res.json(internship);
 });
 
 // Post a new internship (Company role only)
-app.post('/internships', (req, res) => {
+app.post('/internships', async (req, res) => {
     const { title, company, category, price, location, capacity, skills, description } = req.body;
     
     if (!title || !company || !category || !location || !description) {
         return res.status(400).json({ error: 'Missing required fields: title, company, category, location, description' });
     }
 
+    const currentList = await getInternships();
+    const newId = currentList.length > 0 ? Math.max(...currentList.map(i => i.id || 0)) + 1 : 1;
+
     const newInternship = {
-        id: INTERNSHIPS.length + 1,
+        id: newId,
         title,
         company,
         category,
-        price: Number(price) || 0, // default free application
+        price: Number(price) || 0,
         location,
         available: Number(capacity) || 5,
         capacity: Number(capacity) || 5,
-        date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
+        date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         skills: Array.isArray(skills) ? skills : (skills ? String(skills).split(',').map(s => s.trim()) : []),
         description
     };
+
+    if (db.isReady()) {
+        const doc = await db.Internship.create(newInternship);
+        return res.status(201).json(doc);
+    }
 
     INTERNSHIPS.push(newInternship);
     res.status(201).json(newInternship);
 });
 
 // Reserve a slot (Called by Booking/Application Service)
-app.patch('/internships/:id/book', (req, res) => {
+app.patch('/internships/:id/book', async (req, res) => {
     const quantity = Number(req.body.quantity || 1);
-    const internship = findInternship(req.params.id);
-
-    if (!internship) {
-        return res.status(404).json({ error: 'Internship not found' });
-    }
+    const numericId = Number(req.params.id);
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
     }
 
+    if (db.isReady()) {
+        const doc = await db.Internship.findOne({ id: numericId });
+        if (!doc) return res.status(404).json({ error: 'Internship not found' });
+        if (doc.available < quantity) {
+            return res.status(409).json({ error: 'Not enough slots available', available: doc.available });
+        }
+        doc.available -= quantity;
+        await doc.save();
+        return res.json({ success: true, internship: doc, reserved: quantity, remaining: doc.available });
+    }
+
+    const internship = INTERNSHIPS.find((item) => item.id === numericId);
+    if (!internship) return res.status(404).json({ error: 'Internship not found' });
     if (internship.available < quantity) {
         return res.status(409).json({ error: 'Not enough slots available', available: internship.available });
     }
-
     internship.available -= quantity;
     res.json({ success: true, internship, reserved: quantity, remaining: internship.available });
 });
 
 // Roll back availability if another service fails after reservation.
-app.patch('/internships/:id/release', (req, res) => {
+app.patch('/internships/:id/release', async (req, res) => {
     const quantity = Number(req.body.quantity || 1);
-    const internship = findInternship(req.params.id);
-
-    if (!internship) {
-        return res.status(404).json({ error: 'Internship not found' });
-    }
+    const numericId = Number(req.params.id);
 
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
         return res.status(400).json({ error: 'Quantity must be an integer between 1 and 10' });
     }
 
+    if (db.isReady()) {
+        const doc = await db.Internship.findOne({ id: numericId });
+        if (!doc) return res.status(404).json({ error: 'Internship not found' });
+        doc.available = Math.min(doc.capacity, doc.available + quantity);
+        await doc.save();
+        return res.json({ success: true, internship: doc, released: quantity, remaining: doc.available });
+    }
+
+    const internship = INTERNSHIPS.find((item) => item.id === numericId);
+    if (!internship) return res.status(404).json({ error: 'Internship not found' });
     internship.available = Math.min(internship.capacity, internship.available + quantity);
     res.json({ success: true, internship, released: quantity, remaining: internship.available });
 });
 
-app.listen(PORT, () => console.log(`Internship Service running on port ${PORT}`));
+db.initDb(INTERNSHIPS).finally(() => {
+    app.listen(PORT, () => console.log(`Internship Service running on port ${PORT}`));
+});
+
