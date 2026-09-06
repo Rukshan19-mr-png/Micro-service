@@ -10,7 +10,7 @@ const PLATFORM_BENEFITS = [
   {
     icon: ShieldCheck,
     title: 'Secure access',
-    description: 'JWT-powered authentication with a protected gateway and role-based routes for students and companies.',
+    description: 'JWT-powered authentication with a protected gateway and role-based routes for internship candidates and verified companies.',
   },
   {
     icon: TrendingUp,
@@ -104,7 +104,7 @@ const Home = () => {
           </div>
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm text-center">
             <div className="text-4xl font-bold text-pink-600 mb-2">{metrics.totalStudents || 0}</div>
-            <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Students Applied</div>
+            <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Candidates Applied</div>
           </div>
         </div>
 
