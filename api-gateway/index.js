@@ -114,7 +114,11 @@ app.post('/api/internships', authenticate, requireRole('company'), async (req, r
     try {
         const response = await axios.post(`${SERVICES.internships}/internships`, {
             ...req.body,
-            postedBy: req.user.userId
+            postedBy: req.user.userId,
+            companyName: req.user.name,
+            officialWebsite: req.user.website,
+            officialEmail: req.user.email,
+            officialPhone: req.user.phone
         });
         res.status(response.status).json(response.data);
     } catch (err) {
