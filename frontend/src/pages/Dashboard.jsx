@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Bell, Briefcase, Users, FileText } from 'lucide-react';
+import { Bell, Briefcase, Users, FileText, Globe, Phone, Mail, BadgeCheck, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -14,10 +14,13 @@ const Dashboard = () => {
   const [submitting, setSubmitting] = useState(false);
   const [postForm, setPostForm] = useState({
     title: '',
-    company: '',
+    company: currentUser?.name || currentUser?.email?.split('@')[0] || '',
+    website: currentUser?.website || '',
+    companyEmail: currentUser?.email || '',
+    companyPhone: currentUser?.phone || '',
     category: 'Engineering',
-    price: 15,
-    location: '',
+    price: 0,
+    location: currentUser?.location || 'Colombo, Sri Lanka',
     capacity: 5,
     skills: '',
     description: ''
@@ -52,7 +55,10 @@ const Dashboard = () => {
         `${API_BASE}/internships`,
         {
           ...postForm,
-          company: postForm.company || currentUser.email.split('@')[0],
+          company: postForm.company || currentUser?.name || currentUser?.email?.split('@')[0],
+          website: postForm.website || currentUser?.website || '',
+          companyEmail: postForm.companyEmail || currentUser?.email || '',
+          companyPhone: postForm.companyPhone || currentUser?.phone || '',
           skills: postForm.skills.split(',').map((s) => s.trim()).filter(Boolean)
         },
         authHeader()
@@ -61,10 +67,13 @@ const Dashboard = () => {
       setShowPostModal(false);
       setPostForm({
         title: '',
-        company: '',
+        company: currentUser?.name || currentUser?.email?.split('@')[0] || '',
+        website: currentUser?.website || '',
+        companyEmail: currentUser?.email || '',
+        companyPhone: currentUser?.phone || '',
         category: 'Engineering',
-        price: 15,
-        location: '',
+        price: 0,
+        location: currentUser?.location || 'Colombo, Sri Lanka',
         capacity: 5,
         skills: '',
         description: ''
@@ -80,10 +89,28 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Company Dashboard</h1>
-            <p className="text-slate-500">Welcome back, {currentUser.email}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-2xl font-extrabold text-slate-900">{currentUser.name || 'Company Dashboard'}</h1>
+              <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                <BadgeCheck size={14} className="text-emerald-600" /> Verified Company
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 mt-1">
+              <span>{currentUser.email}</span>
+              {currentUser.website && (
+                <a href={currentUser.website} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-semibold">
+                  <Globe size={13} /> {currentUser.website}
+                  <ExternalLink size={11} />
+                </a>
+              )}
+              {currentUser.phone && (
+                <span className="flex items-center gap-1 text-slate-600">
+                  <Phone size={13} /> {currentUser.phone}
+                </span>
+              )}
+            </div>
           </div>
           <button
             onClick={() => setShowPostModal(true)}
@@ -190,17 +217,27 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Company Name</label>
-                  <input value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Google" />
+                  <input value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. WSO2 Sri Lanka" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
-                  <input required value={postForm.category} onChange={(e) => setPostForm({ ...postForm, category: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Frontend" />
+                  <input required value={postForm.category} onChange={(e) => setPostForm({ ...postForm, category: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Backend" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Official Website Link (Shown to candidates) *</label>
+                  <input required value={postForm.website} onChange={(e) => setPostForm({ ...postForm, website: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://yourcompany.com" />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1">Contact Phone</label>
+                  <input value={postForm.companyPhone} onChange={(e) => setPostForm({ ...postForm, companyPhone: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="+94 11 214 5340" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Location</label>
-                  <input required value={postForm.location} onChange={(e) => setPostForm({ ...postForm, location: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Remote / NYC" />
+                  <input required value={postForm.location} onChange={(e) => setPostForm({ ...postForm, location: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. Colombo / Remote" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity Slots</label>

@@ -11,7 +11,7 @@ const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  if (!currentUser || currentUser.role !== 'student') {
+  if (!currentUser || (currentUser.role !== 'candidate' && currentUser.role !== 'student')) {
     return <Navigate to="/" />;
   }
 

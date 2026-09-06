@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Search, Briefcase, MapPin, Loader2, Zap, BadgeCheck, CheckCircle2, Globe, Building2, DollarSign, Laptop, Users, Filter } from 'lucide-react';
+import { Search, Briefcase, MapPin, Loader2, Zap, BadgeCheck, CheckCircle2, Globe, Building2, DollarSign, Laptop, Users, Filter, ExternalLink, ShieldCheck, Phone } from 'lucide-react';
 import StatusBanner from '../components/StatusBanner';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -54,7 +54,7 @@ const Internships = ({ onOpenAuth }) => {
       return;
     }
     if (currentUser?.role === 'company') {
-      alert('Company accounts cannot apply for internships. Switch to a student account.');
+      alert('Company accounts cannot apply for internships. Please sign in with an Internship Candidate account.');
       return;
     }
     navigate(`/apply/${internship.id}`);
@@ -82,7 +82,7 @@ const Internships = ({ onOpenAuth }) => {
     });
   }, [internships, searchTerm, selectedCategory, selectedWorkMode, applicantOrigin]);
 
-  const isStudent = currentUser?.role === 'student' || !currentUser;
+  const isCandidate = currentUser?.role === 'candidate' || !currentUser;
 
   return (
     <div className="min-h-screen bg-slate-50 py-10">
@@ -171,25 +171,24 @@ const Internships = ({ onOpenAuth }) => {
                 </button>
               ))}
             </div>
-
           </div>
+        </div>
 
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${
-                  selectedCategory === cat
-                    ? 'border-slate-900 bg-slate-900 text-white shadow-md'
-                    : 'border-slate-200 hover:border-indigo-400 hover:text-indigo-600 bg-white text-slate-600'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        {/* Category Filters */}
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 rounded-full text-xs font-bold border transition-all ${
+                selectedCategory === cat
+                  ? 'border-slate-900 bg-slate-900 text-white shadow-md'
+                  : 'border-slate-200 hover:border-indigo-400 hover:text-indigo-600 bg-white text-slate-600'
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
         {/* Results Counter */}
@@ -203,7 +202,7 @@ const Internships = ({ onOpenAuth }) => {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 text-slate-500">
             <Loader2 className="w-10 h-10 animate-spin mb-4 text-indigo-500" />
-            <p className="font-medium">Loading Sri Lanka & Global opportunities...</p>
+            <p className="font-medium">Loading verified opportunities...</p>
           </div>
         ) : filteredInternships.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-white rounded-3xl border border-slate-100 border-dashed">
@@ -216,7 +215,6 @@ const Internships = ({ onOpenAuth }) => {
             {filteredInternships.map((internship) => {
               const alreadyApplied = applications.some((a) => a.eventId === internship.id);
               const isOnline = internship.workMode?.includes('Online') || internship.location?.includes('Remote');
-              const isSriLankaCompany = internship.company.includes('Sri Lanka') || internship.location.includes('Sri Lanka') || internship.country === 'Sri Lanka';
               
               return (
                 <div key={internship.id} className="group bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col">
@@ -241,31 +239,42 @@ const Internships = ({ onOpenAuth }) => {
                       </div>
                     </div>
 
-                    <div>
-                      {isSriLankaCompany && (
-                        <span className="text-amber-300 text-[11px] font-extrabold uppercase tracking-wider mb-1 block">
-                          🇱🇰 Sri Lanka HQ
-                        </span>
-                      )}
-                      <h3 className="text-lg font-bold text-white drop-shadow-sm line-clamp-2 leading-tight">
-                        {internship.title}
-                      </h3>
-                    </div>
+                    <h3 className="text-lg font-bold text-white drop-shadow-sm line-clamp-2 leading-tight">
+                      {internship.title}
+                    </h3>
                   </div>
 
                   {/* Card Body */}
                   <div className="p-6 flex-1 flex flex-col">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-700 text-sm">
+                    <div className="flex items-start justify-between gap-2 mb-4">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-black text-indigo-700 text-sm flex-shrink-0">
                           {internship.company.charAt(0)}
                         </div>
-                        <div>
-                          <span className="font-bold text-slate-800 text-sm block leading-none">{internship.company}</span>
-                          <span className="text-[11px] text-slate-400 mt-0.5 block">{internship.duration || '6 Months'} Internship</span>
+                        <div className="min-w-0">
+                          <span className="font-bold text-slate-800 text-sm block leading-tight truncate">{internship.company}</span>
+                          {internship.website ? (
+                            <a
+                              href={internship.website}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 hover:underline mt-0.5 transition-colors"
+                              title="Visit official company website to verify authenticity"
+                            >
+                              <Globe size={11} />
+                              <span className="truncate max-w-[150px]">{internship.website.replace(/^https?:\/\/(www\.)?/, '')}</span>
+                              <ExternalLink size={10} className="flex-shrink-0" />
+                            </a>
+                          ) : (
+                            <span className="text-[11px] text-slate-400 mt-0.5 block">{internship.duration || '6 Months'} Internship</span>
+                          )}
                         </div>
                       </div>
-                      {internship.verified && <BadgeCheck size={18} className="text-indigo-500 flex-shrink-0" />}
+                      
+                      <div className="flex items-center gap-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex-shrink-0" title="Authenticity verified employer with official domain">
+                        <BadgeCheck size={13} className="text-emerald-600" />
+                        <span>Verified</span>
+                      </div>
                     </div>
 
                     {/* Stipend Banner */}
@@ -321,7 +330,7 @@ const Internships = ({ onOpenAuth }) => {
                           <CheckCircle2 size={16} />
                           Applied
                         </button>
-                      ) : isStudent && internship.available > 0 ? (
+                      ) : isCandidate && internship.available > 0 ? (
                         <button
                           onClick={() => handleOpenApplicationModal(internship)}
                           className="bg-slate-900 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-1"

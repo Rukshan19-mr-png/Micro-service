@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
   User, Mail, Phone, MapPin, Briefcase, FileText, Send, ArrowLeft, 
   CheckCircle2, ShieldCheck, Upload, CreditCard, Building2, 
-  BadgeCheck, AlertCircle, Loader2, FileCheck
+  BadgeCheck, AlertCircle, Loader2, FileCheck, Globe, ExternalLink
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -58,7 +58,9 @@ const ApplyNow = ({ onOpenAuth }) => {
       setForm((prev) => ({
         ...prev,
         fullName: currentUser.name || currentUser.email?.split('@')[0] || '',
-        email: currentUser.email || ''
+        email: currentUser.email || '',
+        phone: currentUser.phone || prev.phone || '',
+        skills: currentUser.fieldOfStudy ? `${currentUser.fieldOfStudy}, ${prev.skills || ''}`.replace(/,\s*$/, '') : prev.skills
       }));
     }
   }, [currentUser]);
@@ -288,6 +290,59 @@ const ApplyNow = ({ onOpenAuth }) => {
                     </span>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            {/* Company Authenticity Verification Box */}
+            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  <Building2 className="text-indigo-600 w-5 h-5" /> Verified Employer
+                </h4>
+                <span className="bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 border border-emerald-200">
+                  <BadgeCheck size={14} className="text-emerald-600" /> Authenticated
+                </span>
+              </div>
+
+              <div className="text-sm space-y-3 pt-2 text-slate-600">
+                {internship?.website && (
+                  <div>
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Official Company Website</span>
+                    <a
+                      href={internship.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 font-semibold text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50/70 px-3 py-2 rounded-xl text-xs w-full justify-between transition-colors group"
+                      title="Inspect official company website"
+                    >
+                      <span className="flex items-center gap-1.5 truncate">
+                        <Globe size={14} className="text-indigo-500 flex-shrink-0" />
+                        <span className="truncate">{internship.website}</span>
+                      </span>
+                      <ExternalLink size={13} className="flex-shrink-0 text-slate-400 group-hover:text-indigo-600" />
+                    </a>
+                  </div>
+                )}
+
+                {internship?.companyEmail && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Mail size={14} className="text-slate-400 flex-shrink-0" />
+                    <span className="text-slate-500">Official Email:</span>
+                    <span className="font-medium text-slate-800 truncate">{internship.companyEmail}</span>
+                  </div>
+                )}
+
+                {internship?.companyPhone && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <Phone size={14} className="text-slate-400 flex-shrink-0" />
+                    <span className="text-slate-500">Official Contact:</span>
+                    <span className="font-medium text-slate-800">{internship.companyPhone}</span>
+                  </div>
+                )}
+
+                <p className="text-[11px] text-slate-400 pt-2 border-t border-slate-100 leading-relaxed">
+                  ✓ This employer's official website and contact credentials have been verified by the platform for candidate trust and authenticity.
+                </p>
               </div>
             </div>
 
