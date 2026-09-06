@@ -29,10 +29,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (email, password, role) => {
+  const register = async (registrationData, password, role) => {
     try {
-      const cleanEmail = email.trim().toLowerCase();
-      const res = await axios.post(`${API_BASE}/auth/register`, { email: cleanEmail, password, role });
+      let payload = {};
+      if (typeof registrationData === 'object') {
+        payload = { ...registrationData };
+        if (payload.email) payload.email = payload.email.trim().toLowerCase();
+      } else {
+        payload = {
+          email: String(registrationData).trim().toLowerCase(),
+          password,
+          role
+        };
+      }
+      const res = await axios.post(`${API_BASE}/auth/register`, payload);
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.error || err.message);
