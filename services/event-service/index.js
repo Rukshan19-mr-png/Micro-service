@@ -24,7 +24,11 @@ const INTERNSHIPS = [
         capacity: 8, 
         date: '2026-09-18', 
         skills: ['Java', 'Go', 'OAuth2', 'Kubernetes', 'Ballerina'], 
-        description: 'Contribute to open-source API management and Identity Server products. Work remotely from anywhere globally or at WSO2 Colombo HQ.' 
+        description: 'Contribute to open-source API management and Identity Server products. Work remotely from anywhere globally or at WSO2 Colombo HQ.',
+        website: 'https://wso2.com',
+        companyEmail: 'careers@wso2.com',
+        companyPhone: '+94 11 214 5340',
+        isVerifiedCompany: true
     },
     { 
         id: 2, 
@@ -47,7 +51,11 @@ const INTERNSHIPS = [
         capacity: 15, 
         date: '2026-10-04', 
         skills: ['Java', 'Spring Boot', 'React', 'TypeScript', 'AWS'], 
-        description: 'Build enterprise fintech platforms for Global 2000 clients with modern microservices architecture and automated testing pipelines.' 
+        description: 'Build enterprise fintech platforms for Global 2000 clients with modern microservices architecture and automated testing pipelines.',
+        website: 'https://www.virtusa.com',
+        companyEmail: 'careers.sl@virtusa.com',
+        companyPhone: '+94 11 472 8000',
+        isVerifiedCompany: true
     },
     { 
         id: 3, 
@@ -70,7 +78,11 @@ const INTERNSHIPS = [
         capacity: 5, 
         date: '2026-08-12', 
         skills: ['Python', 'PyTorch', 'LangChain', 'FastAPI', 'PostgreSQL'], 
-        description: 'Design generative AI agent tools and predictive supply chain optimization engines for North America’s largest foodservice provider.' 
+        description: 'Design generative AI agent tools and predictive supply chain optimization engines for North America’s largest foodservice provider.',
+        website: 'https://syscolabs.lk',
+        companyEmail: 'careers@syscolabs.com',
+        companyPhone: '+94 11 202 4500',
+        isVerifiedCompany: true
     },
     { 
         id: 4, 
@@ -93,7 +105,11 @@ const INTERNSHIPS = [
         capacity: 6, 
         date: '2026-11-01', 
         skills: ['C#', '.NET Core', 'PL/SQL', 'Docker', 'Azure'], 
-        description: 'Engage with IFS R&D team building cloud-native Asset Management and ERP suites serving aerospace and defense industries worldwide.' 
+        description: 'Engage with IFS R&D team building cloud-native Asset Management and ERP suites serving aerospace and defense industries worldwide.',
+        website: 'https://www.ifs.com',
+        companyEmail: 'careers.sl@ifs.com',
+        companyPhone: '+94 11 236 4400',
+        isVerifiedCompany: true
     },
     { 
         id: 5, 
@@ -116,7 +132,11 @@ const INTERNSHIPS = [
         capacity: 4, 
         date: '2026-09-01', 
         skills: ['Python', 'Pandas', 'Spark', 'BigQuery', 'TensorFlow'], 
-        description: 'Analyze real-time network telemetry, customer churn modeling, and automated network slice optimization on Dialog’s 5G infrastructure.' 
+        description: 'Analyze real-time network telemetry, customer churn modeling, and automated network slice optimization on Dialog’s 5G infrastructure.',
+        website: 'https://www.dialog.lk',
+        companyEmail: 'careers@dialog.lk',
+        companyPhone: '+94 77 767 8678',
+        isVerifiedCompany: true
     },
     { 
         id: 6, 
@@ -139,7 +159,11 @@ const INTERNSHIPS = [
         capacity: 5, 
         date: '2026-09-15', 
         skills: ['Go', 'Redis', 'Kafka', 'PostGIS', 'Node.js'], 
-        description: 'Optimize high-throughput driver dispatch algorithms, spatial indexing, and surge pricing engines handling millions of daily ride requests.' 
+        description: 'Optimize high-throughput driver dispatch algorithms, spatial indexing, and surge pricing engines handling millions of daily ride requests.',
+        website: 'https://pickme.lk',
+        companyEmail: 'careers@pickme.lk',
+        companyPhone: '+94 11 450 7500',
+        isVerifiedCompany: true
     },
     { 
         id: 7, 
@@ -162,7 +186,11 @@ const INTERNSHIPS = [
         capacity: 7, 
         date: '2026-10-01', 
         skills: ['React', 'Next.js', 'Tailwind CSS', 'TypeScript', 'Jest'], 
-        description: 'Build responsive web apps for Scandinavian software vendors. Foreign candidates can work online asynchronously.' 
+        description: 'Build responsive web apps for Scandinavian software vendors. Foreign candidates can work online asynchronously.',
+        website: 'https://99x.io',
+        companyEmail: 'careers@99x.io',
+        companyPhone: '+94 11 472 1199',
+        isVerifiedCompany: true
     },
     { 
         id: 8, 
@@ -185,7 +213,11 @@ const INTERNSHIPS = [
         capacity: 5, 
         date: '2026-08-30', 
         skills: ['Node.js', 'Vue.js', 'GraphQL', 'MongoDB', 'AWS Lambda'], 
-        description: 'Develop data-driven marketing technologies, analytics dashboards, and web automation tools for top US & Australian venture-backed brands.' 
+        description: 'Develop data-driven marketing technologies, analytics dashboards, and web automation tools for top US & Australian venture-backed brands.',
+        website: 'https://surgeglobal.io',
+        companyEmail: 'careers@surgeglobal.io',
+        companyPhone: '+94 11 750 0900',
+        isVerifiedCompany: true
     },
     { 
         id: 9, 
@@ -208,7 +240,11 @@ const INTERNSHIPS = [
         capacity: 4, 
         date: '2026-09-10', 
         skills: ['React Native', 'TypeScript', 'Redux Toolkit', 'iOS/Android'], 
-        description: 'Craft cross-platform mobile apps for Silicon Valley client startups with slick animations and offline storage support.' 
+        description: 'Craft cross-platform mobile apps for Silicon Valley client startups with slick animations and offline storage support.',
+        website: 'https://calcey.com',
+        companyEmail: 'careers@calcey.com',
+        companyPhone: '+94 11 250 8200',
+        isVerifiedCompany: true
     },
     { 
         id: 10, 
@@ -231,7 +267,11 @@ const INTERNSHIPS = [
         capacity: 6, 
         date: '2026-10-15', 
         skills: ['Python', 'C++', 'OpenCV', 'ROS', 'Machine Learning'], 
-        description: 'Work on cutting-edge autonomous vehicle navigation systems, smart agriculture robotics, and AI travel engines.' 
+        description: 'Work on cutting-edge autonomous vehicle navigation systems, smart agriculture robotics, and AI travel engines.',
+        website: 'https://codegen.co.uk',
+        companyEmail: 'careers@codegen.co.uk',
+        companyPhone: '+94 11 266 7900',
+        isVerifiedCompany: true
     },
     { 
         id: 11, 
@@ -254,7 +294,11 @@ const INTERNSHIPS = [
         capacity: 5, 
         date: '2026-10-01', 
         skills: ['Node.js', 'Express', 'PCI-DSS', 'PostgreSQL', 'Redis'], 
-        description: 'Integrate real-time QR payments, card processing pipelines, and banking API integrations compliant with Central Bank regulations.' 
+        description: 'Integrate real-time QR payments, card processing pipelines, and banking API integrations compliant with Central Bank regulations.',
+        website: 'https://directpay.lk',
+        companyEmail: 'info@directpay.lk',
+        companyPhone: '+94 11 755 5888',
+        isVerifiedCompany: true
     },
     { 
         id: 12, 
@@ -277,7 +321,11 @@ const INTERNSHIPS = [
         capacity: 3, 
         date: '2026-09-25', 
         skills: ['SIEM', 'Python', 'Ethical Hacking', 'Network Security', 'Wireshark'], 
-        description: 'Conduct security audits, vulnerability assessments, and SOC incident responses for Sri Lanka’s leading financial institutions.' 
+        description: 'Conduct security audits, vulnerability assessments, and SOC incident responses for Sri Lanka’s leading financial institutions.',
+        website: 'https://mitesp.com',
+        companyEmail: 'careers@mitesp.com',
+        companyPhone: '+94 11 241 6000',
+        isVerifiedCompany: true
     },
     { 
         id: 13, 
@@ -300,7 +348,11 @@ const INTERNSHIPS = [
         capacity: 10, 
         date: '2026-08-12', 
         skills: ['Python', 'PyTorch', 'JAX', 'Reinforcement Learning'], 
-        description: 'Implement neural architectures, evaluate LLM reasoning bounds, and train agentic workflow loops with international UK/US teams.' 
+        description: 'Implement neural architectures, evaluate LLM reasoning bounds, and train agentic workflow loops with international UK/US teams.',
+        website: 'https://deepmind.google',
+        companyEmail: 'deepmind-careers@google.com',
+        companyPhone: '+44 20 7031 3000',
+        isVerifiedCompany: true
     },
     { 
         id: 14, 
@@ -323,7 +375,65 @@ const INTERNSHIPS = [
         capacity: 4, 
         date: '2026-10-01', 
         skills: ['Ruby', 'Go', 'Distributed Systems', 'gRPC'], 
-        description: 'Build foundational payment routing engines, fraud prevention pipelines, and API integrations for global Stripe merchants.' 
+        description: 'Build foundational payment routing engines, fraud prevention pipelines, and API integrations for global Stripe merchants.',
+        website: 'https://stripe.com',
+        companyEmail: 'jobs@stripe.com',
+        companyPhone: '+1 888 963 8969',
+        isVerifiedCompany: true
+    },
+    { 
+        id: 15, 
+        title: 'Fintech Software Engineering Intern', 
+        company: 'London Stock Exchange Group (LSEG)', 
+        category: 'Backend', 
+        price: 0, 
+        isForeignCompany: false,
+        location: 'Colombo 10, Sri Lanka',
+        workMode: 'Hybrid',
+        eligibleApplicants: 'Global (Foreign & Local)',
+        stipend: 'LKR 115,000 / mo',
+        stipendCurrency: 'LKR',
+        duration: '6 Months',
+        country: 'Sri Lanka',
+        city: 'Colombo',
+        verified: true,
+        featured: true,
+        available: 6, 
+        capacity: 8, 
+        date: '2026-10-20', 
+        skills: ['C++', 'Java', 'Market Data', 'Kafka', 'Linux'], 
+        description: 'Engineer high-throughput real-time financial market data feeds and trading infrastructure at LSEG Technology Colombo.',
+        website: 'https://www.lseg.com',
+        companyEmail: 'earlycareers@lseg.com',
+        companyPhone: '+44 20 7797 1000',
+        isVerifiedCompany: true
+    },
+    { 
+        id: 16, 
+        title: 'Digital Telco Cloud & Kubernetes Intern', 
+        company: 'Axiata Digital Labs (ADL)', 
+        category: 'DevOps', 
+        price: 0, 
+        isForeignCompany: false,
+        location: 'Colombo 03, Sri Lanka',
+        workMode: 'Hybrid',
+        eligibleApplicants: 'Local (Sri Lanka Only)',
+        stipend: 'LKR 95,000 / mo',
+        stipendCurrency: 'LKR',
+        duration: '6 Months',
+        country: 'Sri Lanka',
+        city: 'Colombo',
+        verified: true,
+        featured: false,
+        available: 5, 
+        capacity: 6, 
+        date: '2026-11-05', 
+        skills: ['Kubernetes', 'CI/CD', 'Helm', 'Terraform', 'Prometheus'], 
+        description: 'Deploy automated cloud-native pipelines, manage production container clusters, and implement GitOps observability.',
+        website: 'https://axiatadigitallabs.com',
+        companyEmail: 'careers@axiatadigitallabs.com',
+        companyPhone: '+94 11 200 4000',
+        isVerifiedCompany: true
     }
 ];
 
@@ -397,10 +507,14 @@ app.get('/internships/:id', async (req, res) => {
 
 // Post a new internship (Company role only)
 app.post('/internships', async (req, res) => {
-    const { title, company, category, price, location, capacity, skills, description } = req.body;
+    const { title, category, price, location, capacity, skills, description, companyName, officialWebsite, officialEmail, officialPhone } = req.body;
+    const company = companyName;
+    const website = officialWebsite;
+    const companyEmail = officialEmail;
+    const companyPhone = officialPhone;
     
-    if (!title || !company || !category || !location || !description) {
-        return res.status(400).json({ error: 'Missing required fields: title, company, category, location, description' });
+    if (!title || !company || !category || !location || !description || !website || !companyEmail || !companyPhone) {
+        return res.status(400).json({ error: 'A verified company profile is required to publish an internship' });
     }
 
     const currentList = await getInternships();
@@ -417,7 +531,11 @@ app.post('/internships', async (req, res) => {
         capacity: Number(capacity) || 5,
         date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         skills: Array.isArray(skills) ? skills : (skills ? String(skills).split(',').map(s => s.trim()) : []),
-        description
+        description,
+        website: website || '',
+        companyEmail: companyEmail || '',
+        companyPhone: companyPhone || '',
+        isVerifiedCompany: true
     };
 
     if (db.isReady()) {

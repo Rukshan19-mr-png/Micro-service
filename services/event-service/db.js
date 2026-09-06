@@ -23,7 +23,11 @@ const internshipSchema = new mongoose.Schema({
     capacity: { type: Number, required: true },
     date: { type: String },
     skills: [String],
-    description: { type: String, required: true }
+    description: { type: String, required: true },
+    website: { type: String, default: '' },
+    companyEmail: { type: String, default: '' },
+    companyPhone: { type: String, default: '' },
+    isVerifiedCompany: { type: Boolean, default: true }
 }, { timestamps: true });
 
 const Internship = mongoose.model('Internship', internshipSchema);
@@ -39,6 +43,19 @@ const initDb = async (seedData = []) => {
         if (count === 0 && seedData.length > 0) {
             await Internship.insertMany(seedData);
             console.log(`Database seeded with ${seedData.length} initial internships.`);
+        } else if (seedData.length > 0) {
+            // Update any existing records missing official website
+            for (const item of seedData) {
+                await Internship.updateOne(
+                    { id: item.id },
+                    { $set: { 
+                        website: item.website || '',
+                        companyEmail: item.companyEmail || '',
+                        companyPhone: item.companyPhone || '',
+                        isVerifiedCompany: true
+                    } }
+                );
+            }
         }
         return true;
     } catch (error) {
