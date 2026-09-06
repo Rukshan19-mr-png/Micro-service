@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
@@ -19,6 +19,14 @@ app.use((req, res, next) => {
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecret_vercel_key_2026';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '2h';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/event_db';
+const isValidWebsite = (website) => {
+    try {
+        const url = new URL(website);
+        return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname);
+    } catch {
+        return false;
+    }
+};
 
 // ─── POSTGRESQL AUTH STORAGE ──────────────────────────────────────────────────
 const pool = new Pool({
@@ -37,7 +45,13 @@ const initPg = async () => {
                 id SERIAL PRIMARY KEY,
                 email VARCHAR(255) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
-                role VARCHAR(50) DEFAULT 'student',
+                role VARCHAR(50) DEFAULT 'candidate',
+                name VARCHAR(255),
+                phone VARCHAR(100),
+                website VARCHAR(255),
+                university VARCHAR(255),
+                field_of_study VARCHAR(255),
+                location VARCHAR(255),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
@@ -50,12 +64,15 @@ initPg();
 
 const memoryUsers = [];
 
-async function createUser(email, password, role = 'student') {
+async function createUser(email, password, role = 'candidate', profile = {}) {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const normalizedRole = role === 'student' ? 'candidate' : role;
+    const { name = '', phone = '', website = '', university = '', fieldOfStudy = '', location = '' } = profile;
+
     if (pgReady) {
         const result = await pool.query(
-            'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role, created_at',
-            [email, hashedPassword, role]
+            'INSERT INTO users (email, password, role, name, phone, website, university, field_of_study, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, email, role, name, phone, website, university, field_of_study, location, created_at',
+            [email, hashedPassword, normalizedRole, name, phone, website, university, fieldOfStudy, location]
         );
         return result.rows[0];
     }
@@ -64,7 +81,19 @@ async function createUser(email, password, role = 'student') {
         err.code = '23505';
         throw err;
     }
-    const user = { id: memoryUsers.length + 1, email, password: hashedPassword, role, createdAt: new Date().toISOString() };
+    const user = { 
+        id: memoryUsers.length + 1, 
+        email, 
+        password: hashedPassword, 
+        role: normalizedRole, 
+        name,
+        phone,
+        website,
+        university,
+        fieldOfStudy,
+        location,
+        createdAt: new Date().toISOString() 
+    };
     memoryUsers.push(user);
     return user;
 }
@@ -99,7 +128,11 @@ const internshipSchema = new mongoose.Schema({
     capacity: { type: Number, required: true },
     date: { type: String },
     skills: [String],
-    description: { type: String, required: true }
+    description: { type: String, required: true },
+    website: { type: String, default: '' },
+    companyEmail: { type: String, default: '' },
+    companyPhone: { type: String, default: '' },
+    isVerifiedCompany: { type: Boolean, default: true }
 }, { timestamps: true });
 
 let Internship;
@@ -112,9 +145,14 @@ try {
 let mongoReady = false;
 
 const INITIAL_INTERNSHIPS = [
-    { id: 1, title: 'Cloud Security & Middleware Intern', company: 'WSO2 Sri Lanka', category: 'Backend', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: 'LKR 120,000 / mo ($400 USD)', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 8, capacity: 8, date: '2026-09-18', skills: ['Java', 'Go', 'OAuth2', 'Kubernetes', 'Ballerina'], description: 'Contribute to open-source API management and Identity Server products.' },
-    { id: 2, title: 'Full Stack Java & React Intern', company: 'Virtusa Sri Lanka', category: 'Full Stack', price: 0, isForeignCompany: false, location: 'Colombo (Orion City), Sri Lanka', workMode: 'Hybrid', eligibleApplicants: 'Local (Sri Lanka Only)', stipend: 'LKR 95,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 12, capacity: 15, date: '2026-10-04', skills: ['Java', 'Spring Boot', 'React', 'TypeScript', 'AWS'], description: 'Build enterprise fintech platforms for Global 2000 clients.' },
-    { id: 3, title: 'AI & Generative LLM Engineering Intern', company: 'Sysco LABS Sri Lanka', category: 'AI/ML', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: '$600 USD / mo (LKR 180,000)', stipendCurrency: 'USD', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 5, capacity: 5, date: '2026-08-12', skills: ['Python', 'PyTorch', 'LangChain', 'FastAPI', 'PostgreSQL'], description: 'Design generative AI agent tools and predictive engines.' }
+    { id: 1, title: 'Cloud Security & Middleware Intern', company: 'WSO2 Sri Lanka', category: 'Backend', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: 'LKR 120,000 / mo ($400 USD)', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 8, capacity: 8, date: '2026-09-18', skills: ['Java', 'Go', 'OAuth2', 'Kubernetes', 'Ballerina'], description: 'Contribute to open-source API management and Identity Server products.', website: 'https://wso2.com', companyEmail: 'careers@wso2.com', companyPhone: '+94 11 214 5340', isVerifiedCompany: true },
+    { id: 2, title: 'Full Stack Java & React Intern', company: 'Virtusa Sri Lanka', category: 'Full Stack', price: 0, isForeignCompany: false, location: 'Colombo (Orion City), Sri Lanka', workMode: 'Hybrid', eligibleApplicants: 'Local (Sri Lanka Only)', stipend: 'LKR 95,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 12, capacity: 15, date: '2026-10-04', skills: ['Java', 'Spring Boot', 'React', 'TypeScript', 'AWS'], description: 'Build enterprise fintech platforms for Global 2000 clients.', website: 'https://www.virtusa.com', companyEmail: 'careers.sl@virtusa.com', companyPhone: '+94 11 472 8000', isVerifiedCompany: true },
+    { id: 3, title: 'AI & Generative LLM Engineering Intern', company: 'Sysco LABS Sri Lanka', category: 'AI/ML', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: '$600 USD / mo (LKR 180,000)', stipendCurrency: 'USD', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 5, capacity: 5, date: '2026-08-12', skills: ['Python', 'PyTorch', 'LangChain', 'FastAPI', 'PostgreSQL'], description: 'Design generative AI agent tools and predictive engines.', website: 'https://syscolabs.lk', companyEmail: 'careers@syscolabs.com', companyPhone: '+94 11 202 4500', isVerifiedCompany: true },
+    { id: 4, title: 'Enterprise Cloud ERP Systems Intern', company: 'IFS Sri Lanka', category: 'Backend', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Onsite', eligibleApplicants: 'Local (Sri Lanka Only)', stipend: 'LKR 100,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: false, available: 6, capacity: 6, date: '2026-11-01', skills: ['C#', '.NET Core', 'PL/SQL', 'Docker', 'Azure'], description: 'Engage with IFS R&D team building cloud-native ERP suites.', website: 'https://www.ifs.com', companyEmail: 'careers.sl@ifs.com', companyPhone: '+94 11 236 4400', isVerifiedCompany: true },
+    { id: 5, title: '5G Telecom Data Science & ML Intern', company: 'Dialog Axiata PLC', category: 'Data Science', price: 0, isForeignCompany: false, location: 'Colombo 02, Sri Lanka', workMode: 'Hybrid', eligibleApplicants: 'Local (Sri Lanka Only)', stipend: 'LKR 85,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: false, available: 4, capacity: 4, date: '2026-09-01', skills: ['Python', 'Pandas', 'Spark', 'BigQuery', 'TensorFlow'], description: 'Analyze real-time network telemetry on Dialog’s 5G infrastructure.', website: 'https://dialog.lk', companyEmail: 'careers@dialog.lk', companyPhone: '+94 77 767 8678', isVerifiedCompany: true },
+    { id: 6, title: 'Dispatch Algorithm & Mobility Tech Intern', company: 'PickMe (Digital Mobility)', category: 'Backend', price: 0, isForeignCompany: false, location: 'Colombo 05, Sri Lanka', workMode: 'Onsite', eligibleApplicants: 'Local (Sri Lanka Only)', stipend: 'LKR 90,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: true, available: 5, capacity: 5, date: '2026-09-15', skills: ['Go', 'Redis', 'Kafka', 'PostGIS', 'Node.js'], description: 'Optimize high-throughput driver dispatch algorithms.', website: 'https://pickme.lk', companyEmail: 'careers@pickme.lk', companyPhone: '+94 11 450 7500', isVerifiedCompany: true },
+    { id: 7, title: 'Frontend UX & Micro-Frontends Intern', company: '99x Sri Lanka', category: 'Frontend', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: '$450 USD / mo', stipendCurrency: 'USD', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: false, available: 7, capacity: 7, date: '2026-10-01', skills: ['React', 'Next.js', 'Tailwind CSS', 'TypeScript', 'Jest'], description: 'Build responsive web apps for Scandinavian software vendors.', website: 'https://99x.io', companyEmail: 'careers@99x.io', companyPhone: '+94 11 472 1199', isVerifiedCompany: true },
+    { id: 8, title: 'Growth Tech & Full Stack Engineering Intern', company: 'Surge Global', category: 'Full Stack', price: 0, isForeignCompany: false, location: 'Colombo, Sri Lanka', workMode: 'Online (Remote)', eligibleApplicants: 'Global (Foreign & Local)', stipend: 'LKR 110,000 / mo', stipendCurrency: 'LKR', duration: '6 Months', country: 'Sri Lanka', city: 'Colombo', verified: true, featured: false, available: 5, capacity: 5, date: '2026-08-30', skills: ['Node.js', 'Vue.js', 'GraphQL', 'MongoDB', 'AWS Lambda'], description: 'Develop data-driven marketing technologies.', website: 'https://surgeglobal.io', companyEmail: 'careers@surgeglobal.io', companyPhone: '+94 11 750 0900', isVerifiedCompany: true }
 ];
 
 const memoryInternships = JSON.parse(JSON.stringify(INITIAL_INTERNSHIPS));
@@ -218,7 +256,8 @@ app.post(['/api/auth/:action', '/auth/:action'], async (req, res) => {
     if (action === 'register') {
         const email = String(req.body.email || '').trim().toLowerCase();
         const password = String(req.body.password || '');
-        const role = String(req.body.role || 'student').trim().toLowerCase();
+        const rawRole = String(req.body.role || 'candidate').trim().toLowerCase();
+        const role = (rawRole === 'student') ? 'candidate' : rawRole;
 
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return res.status(400).json({ error: 'A valid email is required' });
@@ -226,15 +265,47 @@ app.post(['/api/auth/:action', '/auth/:action'], async (req, res) => {
         if (password.length < 8) {
             return res.status(400).json({ error: 'Password must be at least 8 characters' });
         }
-        if (!['student', 'company'].includes(role)) {
-            return res.status(400).json({ error: 'Role must be student or company' });
+        if (!['candidate', 'company'].includes(role)) {
+            return res.status(400).json({ error: 'Role must be candidate or company' });
+        }
+
+        const name = String(req.body.name || req.body.fullName || req.body.companyName || '').trim();
+        const phone = String(req.body.phone || req.body.phoneNumber || '').trim();
+        const website = String(req.body.website || req.body.officialWebsite || '').trim();
+        const university = String(req.body.university || '').trim();
+        const fieldOfStudy = String(req.body.fieldOfStudy || '').trim();
+        const location = String(req.body.location || '').trim();
+
+        if (role === 'company') {
+            if (!website) {
+                return res.status(400).json({ error: 'Official company website link is required to verify authenticity' });
+            }
+            if (!phone) {
+                return res.status(400).json({ error: 'Official company contact/phone number is required' });
+            }
+            if (!name) {
+                return res.status(400).json({ error: 'Company name is required' });
+            }
+            if (!isValidWebsite(website)) {
+                return res.status(400).json({ error: 'Enter a valid official website URL, including https://' });
+            }
         }
 
         try {
-            const user = await createUser(email, password, role);
+            const user = await createUser(email, password, role, { name, phone, website, university, fieldOfStudy, location });
             return res.status(201).json({
                 message: 'User registered successfully',
-                user: { id: user.id, email: user.email, role: user.role }
+                user: { 
+                    id: user.id, 
+                    email: user.email, 
+                    role: user.role, 
+                    name: user.name, 
+                    phone: user.phone, 
+                    website: user.website,
+                    university: user.university,
+                    fieldOfStudy: user.fieldOfStudy,
+                    location: user.location
+                }
             });
         } catch (err) {
             if (err.code === '23505') return res.status(400).json({ error: 'Email already exists' });
@@ -249,8 +320,29 @@ app.post(['/api/auth/:action', '/auth/:action'], async (req, res) => {
         try {
             const user = await findUserByEmail(email);
             if (user && await bcrypt.compare(password, user.password)) {
-                const token = jwt.sign({ userId: user.id, email: user.email, role: user.role || 'student' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-                return res.json({ token, user: { id: user.id, email: user.email, role: user.role } });
+                const userRole = user.role === 'student' ? 'candidate' : (user.role || 'candidate');
+                const token = jwt.sign({ 
+                    userId: user.id, 
+                    email: user.email, 
+                    role: userRole,
+                    name: user.name || '',
+                    website: user.website || '',
+                    phone: user.phone || ''
+                }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+                return res.json({ 
+                    token, 
+                    user: { 
+                        id: user.id, 
+                        email: user.email, 
+                        role: userRole,
+                        name: user.name || '',
+                        website: user.website || '',
+                        phone: user.phone || '',
+                        university: user.university || '',
+                        fieldOfStudy: user.field_of_study || user.fieldOfStudy || '',
+                        location: user.location || ''
+                    } 
+                });
             }
             return res.status(401).json({ error: 'Invalid credentials' });
         } catch (err) {
@@ -304,10 +396,14 @@ app.get(['/api/internships/:id', '/internships/:id', '/api/events/:id'], async (
 });
 
 app.post(['/api/internships', '/internships'], authenticate, requireRole('company'), async (req, res) => {
-    const { title, company, category, price, location, capacity, skills, description } = req.body;
+    const { title, category, price, location, capacity, skills, description } = req.body;
+    const company = req.user.name;
+    const website = req.user.website;
+    const companyEmail = req.user.email;
+    const companyPhone = req.user.phone;
     
-    if (!title || !company || !category || !location || !description) {
-        return res.status(400).json({ error: 'Missing required fields: title, company, category, location, description' });
+    if (!title || !company || !category || !location || !description || !website || !companyEmail || !companyPhone) {
+        return res.status(400).json({ error: 'Your company profile must include a name, official website, email, and phone number before posting' });
     }
 
     const currentList = await getInternships();
@@ -324,7 +420,11 @@ app.post(['/api/internships', '/internships'], authenticate, requireRole('compan
         capacity: Number(capacity) || 5,
         date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         skills: Array.isArray(skills) ? skills : (skills ? String(skills).split(',').map((s) => s.trim()) : []),
-        description
+        description,
+        website,
+        companyEmail,
+        companyPhone,
+        isVerifiedCompany: true
     };
 
     if (mongoReady) {
