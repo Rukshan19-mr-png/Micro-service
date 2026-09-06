@@ -12,21 +12,37 @@ const PORT = process.env.PORT || 5001;
 const memoryUsers = [];
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const isValidWebsite = (website) => {
+    try {
+        const url = new URL(website);
+        return ['http:', 'https:'].includes(url.protocol) && Boolean(url.hostname);
+    } catch {
+        return false;
+    }
+};
 
 const sanitizeUser = (user) => ({
     id: user.id,
     email: user.email,
-    role: user.role || 'student',
+    role: user.role === 'student' ? 'candidate' : (user.role || 'candidate'),
+    name: user.name || '',
+    phone: user.phone || '',
+    website: user.website || '',
+    university: user.university || '',
+    fieldOfStudy: user.field_of_study || user.fieldOfStudy || '',
+    location: user.location || '',
     createdAt: user.created_at || user.createdAt
 });
 
-async function createUser(email, password, role = 'student') {
+async function createUser(email, password, role = 'candidate', profile = {}) {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const normalizedRole = role === 'student' ? 'candidate' : role;
+    const { name = '', phone = '', website = '', university = '', fieldOfStudy = '', location = '' } = profile;
 
     if (db.isReady()) {
         const result = await db.query(
-            'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role, created_at',
-            [email, hashedPassword, role]
+            'INSERT INTO users (email, password, role, name, phone, website, university, field_of_study, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, email, role, name, phone, website, university, field_of_study, location, created_at',
+            [email, hashedPassword, normalizedRole, name, phone, website, university, fieldOfStudy, location]
         );
         return result.rows[0];
     }
@@ -41,7 +57,13 @@ async function createUser(email, password, role = 'student') {
         id: memoryUsers.length + 1,
         email,
         password: hashedPassword,
-        role,
+        role: normalizedRole,
+        name,
+        phone,
+        website,
+        university,
+        fieldOfStudy,
+        location,
         createdAt: new Date().toISOString()
     };
     memoryUsers.push(user);
@@ -78,13 +100,37 @@ app.post('/auth/register', async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-    const role = String(req.body.role || 'student').trim().toLowerCase();
-    if (!['student', 'company'].includes(role)) {
-        return res.status(400).json({ error: 'Role must be student or company' });
+    const rawRole = String(req.body.role || 'candidate').trim().toLowerCase();
+    const role = (rawRole === 'student') ? 'candidate' : rawRole;
+    if (!['candidate', 'company'].includes(role)) {
+        return res.status(400).json({ error: 'Role must be candidate or company' });
+    }
+
+    const name = String(req.body.name || req.body.fullName || req.body.companyName || '').trim();
+    const phone = String(req.body.phone || req.body.phoneNumber || '').trim();
+    const website = String(req.body.website || req.body.officialWebsite || '').trim();
+    const university = String(req.body.university || '').trim();
+    const fieldOfStudy = String(req.body.fieldOfStudy || '').trim();
+    const location = String(req.body.location || '').trim();
+
+    // Specific validation for company
+    if (role === 'company') {
+        if (!website) {
+            return res.status(400).json({ error: 'Official company website link is required to verify authenticity' });
+        }
+        if (!phone) {
+            return res.status(400).json({ error: 'Official company contact/phone number is required' });
+        }
+        if (!name) {
+            return res.status(400).json({ error: 'Company name is required' });
+        }
+        if (!isValidWebsite(website)) {
+            return res.status(400).json({ error: 'Enter a valid official website URL, including https://' });
+        }
     }
 
     try {
-        const user = await createUser(email, password, role);
+        const user = await createUser(email, password, role, { name, phone, website, university, fieldOfStudy, location });
         res.status(201).json({ message: 'User registered successfully', user: sanitizeUser(user) });
     } catch (err) {
         if (err.code === '23505') {
@@ -108,7 +154,15 @@ app.post('/auth/login', async (req, res) => {
         const user = await findUserByEmail(email);
         
         if (user && await bcrypt.compare(password, user.password)) {
-            const token = jwt.sign({ userId: user.id, email: user.email, role: user.role || 'student' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+            const userRole = user.role === 'student' ? 'candidate' : (user.role || 'candidate');
+            const token = jwt.sign({ 
+                userId: user.id, 
+                email: user.email, 
+                role: userRole,
+                name: user.name || '',
+                website: user.website || '',
+                phone: user.phone || ''
+            }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
             return res.json({ token, user: sanitizeUser(user) });
         }
         res.status(401).json({ error: 'Invalid credentials' });
