@@ -22,7 +22,22 @@ async function testBookingFlow() {
         const bookRes = await axios.post('http://localhost:8000/api/bookings', 
             { 
                 eventId: 1, 
+<<<<<<< HEAD
                 paymentDetails: { cardNumber: '1234-5678-9012-3456', expiry: '12/26', cvv: '123' } 
+=======
+                paymentDetails: { cardNumber: '1234-5678-9012-3456', expiry: '12/26', cvv: '123' },
+                applicant: {
+                    fullName: 'Test User',
+                    email,
+                    phone: '+123456789',
+                    location: 'San Francisco, CA',
+                    skills: ['JavaScript', 'React'],
+                    experience: '1 year experience',
+                    coverLetter: 'I am excited to apply.',
+                    cvName: 'resume.pdf',
+                    cvData: 'data:application/pdf;base64,sample'
+                }
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
             }, 
             { headers: { authorization: `Bearer ${token}` } }
         );

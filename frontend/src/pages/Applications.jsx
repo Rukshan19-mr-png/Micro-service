@@ -11,7 +11,11 @@ const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
+<<<<<<< HEAD
   if (!currentUser || currentUser.role !== 'student') {
+=======
+  if (!currentUser || (currentUser.role !== 'candidate' && currentUser.role !== 'student')) {
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
     return <Navigate to="/" />;
   }
 
@@ -48,6 +52,7 @@ const Applications = () => {
             <p className="text-slate-500 mb-6">You haven't applied to any internships yet.</p>
           </div>
         ) : (
+<<<<<<< HEAD
           <div className="space-y-4">
             {applications.map((app) => (
               <div key={app.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all hover:shadow-md">
@@ -91,6 +96,53 @@ const Applications = () => {
                   </div>
                 </div>
               </div>
+=======
+          <div className="space-y-6">
+            {applications.map((app) => (
+              <div key={app.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                      {app.company?.charAt(0) || 'C'}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900 leading-tight mb-1">{app.eventTitle}</h3>
+                      <p className="text-slate-600 font-medium">{app.company}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
+                        <span className="flex items-center gap-1"><Calendar size={14} /> Applied {new Date(app.appliedAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1 font-mono text-xs">TXID: {app.transactionId}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col md:items-end">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-emerald-50 text-emerald-700 border border-emerald-200 mb-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      {app.status}
+                    </div>
+                    <span className="text-slate-900 font-bold">${app.totalAmount} Paid</span>
+                    {app.applicant?.cvName && <span className="mt-2 text-sm font-medium text-indigo-600">CV: {app.applicant.cvName}</span>}
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div>
+                      <p className="font-semibold text-slate-900">Applicant details</p>
+                      <p className="mt-1">Name: {app.applicant?.fullName || 'Not provided'}</p>
+                      <p>Email: {app.applicant?.email || 'Not provided'}</p>
+                      <p>Phone: {app.applicant?.phone || 'Not provided'}</p>
+                      <p>Location: {app.applicant?.location || 'Not provided'}</p>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-900">Interview notes</p>
+                      <p className="mt-1">Skills: {app.applicant?.skills?.join(', ') || 'Not provided'}</p>
+                      <p>Experience: {app.applicant?.experience || 'Not provided'}</p>
+                      <p className="mt-2 text-slate-500">{app.applicant?.coverLetter || 'No cover letter provided.'}</p>
+                    </div>
+                  </div>
+                </div>
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
               </div>
             ))}
           </div>

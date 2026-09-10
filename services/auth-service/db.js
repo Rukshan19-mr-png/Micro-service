@@ -18,14 +18,36 @@ const initDb = async () => {
         id SERIAL PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
+<<<<<<< HEAD
         role VARCHAR(50) DEFAULT 'student',
+=======
+        role VARCHAR(50) DEFAULT 'candidate',
+        name VARCHAR(255),
+        phone VARCHAR(100),
+        website VARCHAR(255),
+        university VARCHAR(255),
+        field_of_study VARCHAR(255),
+        location VARCHAR(255),
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
     try {
+<<<<<<< HEAD
       await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'student';`);
     } catch (alterError) {
       console.warn('Could not alter users table to add role column:', alterError.message);
+=======
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'candidate';`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(255);`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(100);`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS website VARCHAR(255);`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS university VARCHAR(255);`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS field_of_study VARCHAR(255);`);
+      await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS location VARCHAR(255);`);
+    } catch (alterError) {
+      console.warn('Could not alter users table:', alterError.message);
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
     }
     ready = true;
     console.log('Database initialized successfully.');

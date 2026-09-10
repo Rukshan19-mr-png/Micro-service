@@ -11,17 +11,42 @@ app.get('/health', (req, res) => {
 
 app.post('/payments/process', (req, res) => {
     const { amount, paymentDetails } = req.body;
+<<<<<<< HEAD
     const cardNumber = String(paymentDetails?.cardNumber || '').replace(/\D/g, '');
+=======
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
     
     if (!Number.isFinite(Number(amount)) || Number(amount) < 0) {
         return res.status(400).json({ status: 'FAILED', error: 'A valid amount is required' });
     }
 
+<<<<<<< HEAD
+=======
+    // If amount is 0, application is completely free
+    if (Number(amount) === 0) {
+        const freePayment = {
+            status: 'SUCCESS',
+            transactionId: 'FREE_' + Date.now().toString(36).toUpperCase(),
+            amount: 0,
+            cardLast4: 'FREE',
+            processedAt: new Date().toISOString()
+        };
+        payments.push(freePayment);
+        return res.json(freePayment);
+    }
+
+    const cardNumber = String(paymentDetails?.cardNumber || '').replace(/\D/g, '');
+
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
     if (!cardNumber || cardNumber.length < 12) {
         return res.status(400).json({ status: 'FAILED', error: 'Missing payment details' });
     }
 
+<<<<<<< HEAD
     if (!paymentDetails.expiry || !paymentDetails.cvv) {
+=======
+    if (!paymentDetails?.expiry || !paymentDetails?.cvv) {
+>>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
         return res.status(400).json({ status: 'FAILED', error: 'Incomplete payment details' });
     }
     
