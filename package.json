@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Microservices Ticketing Platform",
   "scripts": {
+    "start": "node start-dev.js",
+    "dev": "node start-dev.js",
     "install:all": "npm install --prefix api-gateway && npm install --prefix services/auth-service && npm install --prefix services/event-service && npm install --prefix services/booking-service && npm install --prefix services/payment-service && npm install --prefix services/notification-service && npm install --prefix services/analytics-service",
     "start:auth": "node services/auth-service/index.js",
     "start:events": "node services/event-service/index.js",
@@ -15,7 +17,11 @@
     "docker:up": "docker compose -f infrastructure/docker-compose.yml up --build",
     "docker:down": "docker compose -f infrastructure/docker-compose.yml down",
     "build": "npm run build --prefix frontend",
-    "vercel-build": "npm run build --prefix frontend"
+    "vercel-build": "npm run build --prefix frontend",
+    "test": "jest --testPathPattern=tests/unit --forceExit",
+    "test:unit": "jest --testPathPattern=tests/unit --forceExit --verbose",
+    "test:integration": "node test-all-units.js",
+    "test:frontend": "npm run test --prefix frontend"
   },
   "dependencies": {
     "axios": "^1.18.1",
@@ -25,5 +31,19 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.3",
     "pg": "^8.22.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.24.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testTimeout": 15000,
+    "transform": {
+      "^.+\\.js$": "babel-jest"
+    },
+    "testPathIgnorePatterns": ["/node_modules/", "/frontend/"]
   }
 }

@@ -12,8 +12,6 @@ const PORT = process.env.PORT || 5001;
 const memoryUsers = [];
 
 const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-<<<<<<< HEAD
-=======
 const isValidWebsite = (website) => {
     try {
         const url = new URL(website);
@@ -22,24 +20,10 @@ const isValidWebsite = (website) => {
         return false;
     }
 };
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
 
 const sanitizeUser = (user) => ({
     id: user.id,
     email: user.email,
-<<<<<<< HEAD
-    role: user.role || 'student',
-    createdAt: user.created_at || user.createdAt
-});
-
-async function createUser(email, password, role = 'student') {
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    if (db.isReady()) {
-        const result = await db.query(
-            'INSERT INTO users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role, created_at',
-            [email, hashedPassword, role]
-=======
     role: user.role === 'student' ? 'candidate' : (user.role || 'candidate'),
     name: user.name || '',
     phone: user.phone || '',
@@ -59,7 +43,6 @@ async function createUser(email, password, role = 'candidate', profile = {}) {
         const result = await db.query(
             'INSERT INTO users (email, password, role, name, phone, website, university, field_of_study, location) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, email, role, name, phone, website, university, field_of_study, location, created_at',
             [email, hashedPassword, normalizedRole, name, phone, website, university, fieldOfStudy, location]
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
         );
         return result.rows[0];
     }
@@ -74,9 +57,6 @@ async function createUser(email, password, role = 'candidate', profile = {}) {
         id: memoryUsers.length + 1,
         email,
         password: hashedPassword,
-<<<<<<< HEAD
-        role,
-=======
         role: normalizedRole,
         name,
         phone,
@@ -84,7 +64,6 @@ async function createUser(email, password, role = 'candidate', profile = {}) {
         university,
         fieldOfStudy,
         location,
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
         createdAt: new Date().toISOString()
     };
     memoryUsers.push(user);
@@ -121,15 +100,6 @@ app.post('/auth/register', async (req, res) => {
         return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
-<<<<<<< HEAD
-    const role = String(req.body.role || 'student').trim().toLowerCase();
-    if (!['student', 'company'].includes(role)) {
-        return res.status(400).json({ error: 'Role must be student or company' });
-    }
-
-    try {
-        const user = await createUser(email, password, role);
-=======
     const rawRole = String(req.body.role || 'candidate').trim().toLowerCase();
     const role = (rawRole === 'student') ? 'candidate' : rawRole;
     if (!['candidate', 'company'].includes(role)) {
@@ -161,7 +131,6 @@ app.post('/auth/register', async (req, res) => {
 
     try {
         const user = await createUser(email, password, role, { name, phone, website, university, fieldOfStudy, location });
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
         res.status(201).json({ message: 'User registered successfully', user: sanitizeUser(user) });
     } catch (err) {
         if (err.code === '23505') {
@@ -185,9 +154,6 @@ app.post('/auth/login', async (req, res) => {
         const user = await findUserByEmail(email);
         
         if (user && await bcrypt.compare(password, user.password)) {
-<<<<<<< HEAD
-            const token = jwt.sign({ userId: user.id, email: user.email, role: user.role || 'student' }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-=======
             const userRole = user.role === 'student' ? 'candidate' : (user.role || 'candidate');
             const token = jwt.sign({ 
                 userId: user.id, 
@@ -197,7 +163,6 @@ app.post('/auth/login', async (req, res) => {
                 website: user.website || '',
                 phone: user.phone || ''
             }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
             return res.json({ token, user: sanitizeUser(user) });
         }
         res.status(401).json({ error: 'Invalid credentials' });

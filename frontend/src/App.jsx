@@ -8,10 +8,7 @@ import Home from './pages/Home';
 import Internships from './pages/Internships';
 import Applications from './pages/Applications';
 import Dashboard from './pages/Dashboard';
-<<<<<<< HEAD
-=======
 import ApplyNow from './pages/ApplyNow';
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
 
 const AppContent = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -24,10 +21,7 @@ const AppContent = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/internships" element={<Internships onOpenAuth={() => setShowAuthModal(true)} />} />
-<<<<<<< HEAD
-=======
           <Route path="/apply/:id" element={<ApplyNow onOpenAuth={() => setShowAuthModal(true)} />} />
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
           <Route path="/applications" element={<Applications />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />

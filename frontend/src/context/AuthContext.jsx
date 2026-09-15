@@ -29,12 +29,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-<<<<<<< HEAD
-  const register = async (email, password, role) => {
-    try {
-      const cleanEmail = email.trim().toLowerCase();
-      const res = await axios.post(`${API_BASE}/auth/register`, { email: cleanEmail, password, role });
-=======
   const register = async (registrationData, password, role) => {
     try {
       let payload = {};
@@ -49,7 +43,6 @@ export const AuthProvider = ({ children }) => {
         };
       }
       const res = await axios.post(`${API_BASE}/auth/register`, payload);
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.error || err.message);

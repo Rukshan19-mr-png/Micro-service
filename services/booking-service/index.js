@@ -80,11 +80,6 @@ app.post('/bookings', async (req, res) => {
         await axios.patch(`${SERVICES.internships}/internships/${internshipId}/book`, { quantity });
         reservationCreated = true;
         
-<<<<<<< HEAD
-        // Step 3: Process verification fee payment
-        const paymentResponse = await axios.post(`${SERVICES.payments}/payments/process`, {
-            amount: internship.price * quantity,
-=======
         // Helper to check Sri Lanka phone number
         const cleanPhone = String(phone).replace(/[\s\-\(\)]/g, '');
         const isLocalApplicant = cleanPhone.startsWith('+94') || cleanPhone.startsWith('94') || cleanPhone.startsWith('07') || cleanPhone.startsWith('011') || cleanPhone.startsWith('01') || cleanPhone.startsWith('03') || cleanPhone.startsWith('08') || cleanPhone.startsWith('09');
@@ -93,7 +88,6 @@ app.post('/bookings', async (req, res) => {
         // Step 3: Process verification fee payment
         const paymentResponse = await axios.post(`${SERVICES.payments}/payments/process`, {
             amount: applicableFee,
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
             paymentDetails
         });
 
@@ -105,11 +99,7 @@ app.post('/bookings', async (req, res) => {
             company: internship.company,
             userId,
             quantity,
-<<<<<<< HEAD
-            totalAmount: internship.price * quantity,
-=======
             totalAmount: applicableFee,
->>>>>>> 7fb864e190720415daafeeb5e7c85fa42639087b
             status: 'APPLIED',
             transactionId: paymentResponse.data.transactionId,
             appliedAt: new Date().toISOString(),

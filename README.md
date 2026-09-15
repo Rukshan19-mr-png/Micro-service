@@ -69,11 +69,23 @@ When running the full stack with Docker Compose, the following services are avai
 
 Use the API Gateway endpoint for frontend calls and authentication flows.
 
-## �🛠️ Tech Stack
+## 🌐 1-Click Free Vercel Cloud Deployment
+
+This monorepo is fully configured for **unified 100% free Vercel deployment** hosting both the React frontend and Serverless Express API.
+
+### Deploying to Vercel:
+1. Push this repository to GitHub (`https://github.com/Rukshan19-mr-png/Micro-service`).
+2. Navigate to [vercel.com/new](https://vercel.com/new) and import `Rukshan19-mr-png/Micro-service`.
+3. Set **Build Command**: `npm run build` and **Output Directory**: `frontend/dist`.
+4. *(Optional Cloud Databases)*:
+   - `MONGO_URI`: MongoDB Atlas free M0 cluster connection string.
+   - `DB_HOST`: Neon.tech / Supabase PostgreSQL host.
+5. Click **Deploy** to host both frontend and serverless API under a single `.vercel.app` domain.
+
+## 🛠️ Tech Stack
 - **Language**: JavaScript / Node.js
-- **Framework**: Express.js
-- **Database**: MongoDB / PostgreSQL
-- **Communication**: REST, RabbitMQ
-- **Styling**: Vanilla CSS / Tailwind
+- **Framework**: Express.js, React, Vite, Tailwind CSS
+- **Database**: MongoDB Atlas / Neon PostgreSQL
+- **Deployment**: Vercel Serverless Functions & Static CDN
 ---
 *Developed for Software Engineering Internship Portfolio*
