@@ -17,7 +17,7 @@
     "docker:up": "docker compose -f infrastructure/docker-compose.yml up --build",
     "docker:down": "docker compose -f infrastructure/docker-compose.yml down",
     "build": "npm run build --prefix frontend",
-    "vercel-build": "npm install --prefix frontend && npm run build --prefix frontend",
+    "vercel-build": "npm run build --prefix frontend",
     "test": "jest --testPathPattern=tests/unit --forceExit",
     "test:unit": "jest --testPathPattern=tests/unit --forceExit --verbose",
     "test:integration": "node test-all-units.js",
