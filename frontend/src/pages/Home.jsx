@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { ShieldCheck, TrendingUp, Rocket, ArrowRight, Zap, BadgeCheck } from 'lucide-react';
@@ -69,7 +69,7 @@ const Home = () => {
           </h1>
           
           <p className="mt-4 max-w-2xl text-xl text-slate-500 mx-auto mb-10">
-            Discover opportunities at top Sri Lankan companies (WSO2, Virtusa, Sysco LABS, IFS, Dialog, PickMe) and global tech giants. Apply locally onsite or work remotely from anywhere worldwide.
+            Discover opportunities at top Sri Lankan companies (CodeX, NexaStack, DataNova, OrbitERP, PrimeWave, SwiftRide) and global tech giants. Apply locally onsite or work remotely from anywhere worldwide.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
