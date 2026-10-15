@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+﻿import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -112,7 +112,7 @@ const Internships = ({ onOpenAuth }) => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search WSO2, Virtusa, React, Colombo..."
+                placeholder="Search CodeX, NexaStack, React, Colombo..."
                 className="w-full p-1.5 outline-none bg-transparent text-slate-800 placeholder-slate-400 text-sm"
               />
             </div>
