@@ -1,4 +1,7 @@
+<<<<<<< Updated upstream
 {"rewrites":[{"source":"/api/:path*","destination":"/api/index.js"},{"source":"/(.*)","destination":"/index.html"}]}
+=======
+>>>>>>> Stashed changes
 {
   "version": 2,
   "buildCommand": "echo Using committed frontend production assets",
