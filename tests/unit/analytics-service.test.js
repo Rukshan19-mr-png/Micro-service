@@ -46,10 +46,10 @@ describe('Analytics Service — fetchMetrics', () => {
     beforeEach(() => jest.clearAllMocks());
 
     const mockInternships = [
-        { id: 1, company: 'WSO2', available: 5, capacity: 8 },
-        { id: 2, company: 'Virtusa', available: 3, capacity: 5 },
-        { id: 3, company: 'WSO2', available: 0, capacity: 3 },  // Same company, 0 slots
-        { id: 4, company: 'Dialog', available: 10, capacity: 10 },
+        { id: 1, company: 'CodeX', available: 5, capacity: 8 },
+        { id: 2, company: 'NexaStack', available: 3, capacity: 5 },
+        { id: 3, company: 'CodeX', available: 0, capacity: 3 },  // Same company, 0 slots
+        { id: 4, company: 'PrimeWave', available: 10, capacity: 10 },
     ];
 
     const mockApplications = [
@@ -95,7 +95,7 @@ describe('Analytics Service — fetchMetrics', () => {
             .mockResolvedValueOnce({ data: mockNotifications });
 
         const metrics = await fetchMetrics(SERVICES);
-        // WSO2, Virtusa, Dialog = 3 unique companies
+        // CodeX, NexaStack, PrimeWave = 3 unique companies
         expect(metrics.activeCompanies).toBe(3);
     });
 
