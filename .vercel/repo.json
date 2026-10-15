@@ -1,0 +1,11 @@
+{
+  "remoteName": "origin",
+  "projects": [
+    {
+      "id": "prj_jtNGvpXyuKmmFeVd9JFVSzAvUNF0",
+      "name": "micro-service",
+      "directory": ".",
+      "orgId": "team_7rcRbsAusPFvA1HzJ0O4qjF7"
+    }
+  ]
+}
