@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -217,7 +217,7 @@ const Dashboard = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Company Name</label>
-                  <input value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. WSO2 Sri Lanka" />
+                  <input value={postForm.company} onChange={(e) => setPostForm({ ...postForm, company: e.target.value })} className="w-full p-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="e.g. CodeX Sri Lanka" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Category</label>
