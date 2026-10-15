@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { X, Loader2, User, Building2, Globe, Phone, Mail, Lock, GraduationCap, ShieldCheck, MapPin } from 'lucide-react';
 
@@ -232,7 +232,7 @@ const AuthModal = ({ onClose }) => {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm transition-all"
-                      placeholder="e.g. WSO2 Sri Lanka, Virtusa, Sysco LABS"
+                      placeholder="e.g. CodeX Sri Lanka, NexaStack, DataNova"
                     />
                   </div>
                 </div>
