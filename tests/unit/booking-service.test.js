@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Unit Tests — Booking / Application Service
  * Tests the application submission logic, including role guards, field validation,
  * local/foreign fee detection, and Saga rollback with mocked axios.
@@ -205,7 +205,7 @@ describe('Booking Service — Saga Pattern (axios mocked)', () => {
     });
 
     test('successful application (local, free) does not trigger release', async () => {
-        axios.get.mockResolvedValue({ data: { id: 1, title: 'Backend Intern', company: 'WSO2' } });
+        axios.get.mockResolvedValue({ data: { id: 1, title: 'Backend Intern', company: 'CodeX' } });
         axios.patch.mockResolvedValue({ data: { success: true } });
         axios.post
             .mockResolvedValueOnce({ data: { status: 'SUCCESS', transactionId: 'FREE_ABC', amount: 0 } }) // payment
